@@ -1,6 +1,16 @@
 # Compiled class file
 *.class
 
+# Gradle
+.gradle
+build
+
+# IntelliJ
+.idea
+
+# Generated sources
+src-gen
+
 # Log file
 *.log
 
