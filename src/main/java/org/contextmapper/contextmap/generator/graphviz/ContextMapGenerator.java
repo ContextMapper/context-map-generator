@@ -59,13 +59,10 @@ public class ContextMapGenerator {
             MutableNode node2 = this.bcNodesMap.get(rel.getSecondParticipant().getId());
 
             if (rel instanceof Partnership) {
-                System.out.println("link partnership");
                 node1.addLink(to(node2).with(Label.of("Partnership")));
             } else if (rel instanceof SharedKernel) {
-                System.out.println("link shared kernel");
                 node1.addLink(to(node2).with(Label.of("Shared Kernel")));
             } else {
-                System.out.println("link upstream-downstream");
                 UpstreamDownstreamRelationship upDownRel = (UpstreamDownstreamRelationship) rel;
                 node1.addLink(to(node2).with(Attributes.attr("labeldistance", "0"), Attributes.attr("headlabel", Label.html("<table cellspacing=\"0\" cellborder=\"1\" border=\"0\">\n" +
                         "<tr><td sides=\"r\">D</td><td sides=\"\" bgcolor=\"white\"><font POINT-SIZE=\"5\">" + upDownRel.getUpstreamPatterns().toString() + "</font></td></tr>\n" +
