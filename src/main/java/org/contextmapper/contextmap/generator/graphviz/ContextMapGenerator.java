@@ -15,22 +15,23 @@
  */
 package org.contextmapper.contextmap.generator.graphviz;
 
-import guru.nidi.graphviz.attribute.Attributes;
 import guru.nidi.graphviz.attribute.Label;
+import guru.nidi.graphviz.attribute.Shape;
 import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.engine.Graphviz;
 import guru.nidi.graphviz.model.MutableGraph;
 import guru.nidi.graphviz.model.MutableNode;
-import org.contextmapper.contextmap.generator.model.ContextMap;
-import org.contextmapper.contextmap.generator.model.Partnership;
-import org.contextmapper.contextmap.generator.model.SharedKernel;
-import org.contextmapper.contextmap.generator.model.UpstreamDownstreamRelationship;
+import org.contextmapper.contextmap.generator.model.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
+import static guru.nidi.graphviz.attribute.Attributes.attr;
 import static guru.nidi.graphviz.model.Factory.*;
 
 /**
@@ -50,6 +51,8 @@ public class ContextMapGenerator {
         contextMap.getBoundedContexts().forEach(bc -> {
             MutableNode node = mutNode(bc.getId());
             node.add(Label.lines(bc.getName()));
+            node.add(getShape());
+            node.add(attr("margin", "0.3"));
             bcNodesMap.put(bc.getId(), node);
         });
 
@@ -64,11 +67,12 @@ public class ContextMapGenerator {
                 node1.addLink(to(node2).with(Label.of("Shared Kernel")));
             } else {
                 UpstreamDownstreamRelationship upDownRel = (UpstreamDownstreamRelationship) rel;
-                node1.addLink(to(node2).with(Attributes.attr("labeldistance", "0"), Attributes.attr("headlabel", Label.html("<table cellspacing=\"0\" cellborder=\"1\" border=\"0\">\n" +
-                        "<tr><td sides=\"r\">D</td><td sides=\"\" bgcolor=\"white\"><font POINT-SIZE=\"5\">" + upDownRel.getUpstreamPatterns().toString() + "</font></td></tr>\n" +
-                        "</table>")), Attributes.attr("taillabel", Label.html("<table cellspacing=\"0\" cellborder=\"1\" border=\"0\">\n" +
-                        "<tr><td sides=\"r\">U</td><td sides=\"\" port=\"a\" bgcolor=\"white\"><font POINT-SIZE=\"5\" >" + upDownRel.getDownstreamPatterns().toString() + "</font></td></tr>\n" +
-                        "</table>"))));
+                node1.addLink(to(node2).with(
+                        (Label.of("              ")),
+                        attr("labeldistance", "0"),
+                        attr("headlabel", getEdgeHTMLLabel("D", downstreamPatternsToStrings(upDownRel.getDownstreamPatterns()))),
+                        attr("taillabel", getEdgeHTMLLabel("U", upstreamPatternsToStrings(upDownRel.getUpstreamPatterns())))
+                ));
             }
         });
 
@@ -80,6 +84,41 @@ public class ContextMapGenerator {
         // store file
         Graphviz.fromGraph(graph).width(2000).render(Format.PNG).toFile(new File(fileName));
         Graphviz.fromGraph(graph).width(2000).render(Format.DOT).toFile(new File(fileName + ".dot"));
+    }
+
+    /*
+     * Select shape randomly
+     */
+    private Shape getShape() {
+        int selection = new Random().nextInt(2);
+        switch (selection) {
+            case 1:
+                return Shape.EGG;
+            default:
+                return Shape.ELLIPSE;
+        }
+    }
+
+    private Set<String> downstreamPatternsToStrings(Set<DownstreamPatterns> patterns) {
+        return patterns.stream().map(p -> p.toString()).collect(Collectors.toSet());
+    }
+
+    private Set<String> upstreamPatternsToStrings(Set<UpstreamPatterns> patterns) {
+        return patterns.stream().map(p -> p.toString()).collect(Collectors.toSet());
+    }
+
+    private Label getEdgeHTMLLabel(String upstreamDownstreamLabel, Set<String> patterns) {
+        String upstreamDownstreamCell = "<td bgcolor=\"white\">" + upstreamDownstreamLabel + "</td>";
+        String patternCell = "";
+        String border = "0";
+        if (patterns.size() > 0) {
+            upstreamDownstreamCell = "<td bgcolor=\"white\" sides=\"r\">" + upstreamDownstreamLabel + "</td>";
+            patternCell = "<td sides=\"trbl\" bgcolor=\"white\"><font POINT-SIZE=\"5\">" + String.join(", ", patterns) + "</font></td>";
+            border = "1";
+        }
+        return Label.html("<table cellspacing=\"0\" cellborder=\"" + border + "\" border=\"0\">\n" +
+                "<tr>" + upstreamDownstreamCell + patternCell + "</tr>\n" +
+                "</table>");
     }
 
 }
