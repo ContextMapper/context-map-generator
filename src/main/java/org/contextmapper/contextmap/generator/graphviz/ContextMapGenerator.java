@@ -51,8 +51,9 @@ public class ContextMapGenerator {
         contextMap.getBoundedContexts().forEach(bc -> {
             MutableNode node = mutNode(bc.getId());
             node.add(Label.lines(bc.getName()));
-            node.add(getShape());
+            node.add(Shape.EGG);
             node.add(attr("margin", "0.3"));
+            node.add(attr("orientation", orientationDegree()));
             bcNodesMap.put(bc.getId(), node);
         });
 
@@ -89,7 +90,7 @@ public class ContextMapGenerator {
     /*
      * Select shape randomly
      */
-    private Shape getShape() {
+    /*private Shape getShape() {
         int selection = new Random().nextInt(2);
         switch (selection) {
             case 1:
@@ -97,6 +98,13 @@ public class ContextMapGenerator {
             default:
                 return Shape.ELLIPSE;
         }
+    }*/
+
+    /*
+     * Generate random orientation degree
+     */
+    private int orientationDegree() {
+        return new Random().nextInt(350);
     }
 
     private Set<String> downstreamPatternsToStrings(Set<DownstreamPatterns> patterns) {
