@@ -15,6 +15,8 @@
  */
 package org.contextmapper.contextmap.generator.model;
 
+import org.contextmapper.contextmap.generator.model.exception.BoundedContextAlreadyPartOfContextMapException;
+import org.contextmapper.contextmap.generator.model.exception.BoundedContextNotPartOfContextMapException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -81,6 +83,21 @@ public class ContextMapTest {
         // then
         assertEquals("TestContext1", map.getRelationships().stream().findFirst().get().getFirstParticipant().getName());
         assertEquals("TestContext2", map.getRelationships().stream().findFirst().get().getSecondParticipant().getName());
+    }
+
+    @Test
+    public void cannotAddBoundedContextTwice() {
+        // given
+        ContextMap contextMap = new ContextMap();
+        BoundedContext bc = new BoundedContext("TestContext");
+
+        // when
+        contextMap.addBoundedContext(bc);
+
+        // then
+        Assertions.assertThrows(BoundedContextAlreadyPartOfContextMapException.class, () -> {
+            contextMap.addBoundedContext(bc);
+        });
     }
 
 }

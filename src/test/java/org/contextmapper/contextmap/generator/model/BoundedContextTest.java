@@ -16,7 +16,11 @@
 package org.contextmapper.contextmap.generator.model;
 
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class BoundedContextTest {
 
@@ -30,7 +34,35 @@ public class BoundedContextTest {
 
         // then
         assertEquals(myBoundedContextName, bc.getName());
-        assertEquals("TestContext", bc.getId());
+    }
+
+    @Test
+    public void boundedContextsWithSameNameAreEqual() {
+        // given
+        BoundedContext bc1 = new BoundedContext("TestContext");
+        BoundedContext bc2 = new BoundedContext("TestContext");
+        Set<BoundedContext> bcSet = new HashSet<>();
+
+        // when
+        boolean equals = bc1.equals(bc2);
+        bcSet.add(bc1);
+        bcSet.add(bc2);
+
+        // then
+        assertTrue(equals);
+        assertEquals(1, bcSet.size());
+    }
+
+    @Test
+    public void otherObjectsAreNotEqual() {
+        // given
+        BoundedContext bc = new BoundedContext("TestContext");
+
+        // when
+        boolean equals = bc.equals(new Object());
+
+        // then
+        assertFalse(equals);
     }
 
 }

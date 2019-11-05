@@ -19,6 +19,11 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.TreeSet;
 
+/**
+ * Represents an upstream-downstream relationship on a Context Map.
+ *
+ * @author Stefan Kapferer
+ */
 public class UpstreamDownstreamRelationship implements Relationship {
 
     private BoundedContext upstreamBoundedContext;
@@ -33,39 +38,79 @@ public class UpstreamDownstreamRelationship implements Relationship {
         this.downstreamPatterns = new TreeSet<>();
     }
 
+    /**
+     * Gets the upstream Bounded Context.
+     *
+     * @return the upstream Bounded Context
+     */
     public BoundedContext getUpstreamBoundedContext() {
         return upstreamBoundedContext;
     }
 
+    /**
+     * Gets the downstream Bounded Context
+     *
+     * @return the downstream Bounded Context
+     */
     public BoundedContext getDownstreamBoundedContext() {
         return downstreamBoundedContext;
     }
 
+    /**
+     * Sets the upstream relationship patterns (OHS and/or PL) of the relationship.
+     *
+     * @param upstreamPatterns the upstream patterns (OHS and/or PL) of the relationship
+     */
     public UpstreamDownstreamRelationship setUpstreamPatterns(UpstreamPatterns... upstreamPatterns) {
         this.upstreamPatterns = new TreeSet<>();
         this.upstreamPatterns.addAll(Arrays.asList(upstreamPatterns));
         return this;
     }
 
+    /**
+     * Sets the downstream relationship patterns (ACL or CF) of the relationship.
+     *
+     * @param downstreamPatterns the downstream patterns (ACL or CF) of the relationship
+     */
     public UpstreamDownstreamRelationship setDownstreamPatterns(DownstreamPatterns... downstreamPatterns) {
         this.downstreamPatterns = new TreeSet<>();
         this.downstreamPatterns.addAll(Arrays.asList(downstreamPatterns));
         return this;
     }
 
+    /**
+     * Gets the upstream relationship patterns (OHS and/or PL) of the relationship.
+     *
+     * @return the upstream relationship patterns (OHS and/or PL)
+     */
     public Set<UpstreamPatterns> getUpstreamPatterns() {
         return upstreamPatterns;
     }
 
+    /**
+     * Gets the downstream relationship patterns (ACL or CF) of the relationship.
+     *
+     * @return the downstream relationship patterns (ACL or CF)
+     */
     public Set<DownstreamPatterns> getDownstreamPatterns() {
         return downstreamPatterns;
     }
 
+    /**
+     * Gets the first participant (upstream) of the relationship.
+     *
+     * @return the first participant (upstream) of the relationship
+     */
     @Override
     public BoundedContext getFirstParticipant() {
         return upstreamBoundedContext;
     }
 
+    /**
+     * Gets the second participant (downstream) of the relationship.
+     *
+     * @return the second participant (downstream) of the relationship
+     */
     @Override
     public BoundedContext getSecondParticipant() {
         return downstreamBoundedContext;

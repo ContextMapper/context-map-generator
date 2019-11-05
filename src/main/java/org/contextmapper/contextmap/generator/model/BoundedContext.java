@@ -15,22 +15,47 @@
  */
 package org.contextmapper.contextmap.generator.model;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
+/**
+ * Represents a Bounded Context for the graphical Context Map to be generated.
+ *
+ * @author Stefan Kapferer
+ */
 public class BoundedContext {
 
-    private String id;
     private String name;
 
     public BoundedContext(String name) {
         this.name = name;
-        this.id = name.replaceAll(" ", "");
     }
 
+    /**
+     * Gets the Bounded Context name.
+     *
+     * @return the name of the Bounded Context
+     */
     public String getName() {
         return name;
     }
 
-    public String getId() {
-        return id;
+    @Override
+    public boolean equals(Object object) {
+        if (!(object instanceof BoundedContext))
+            return false;
+
+        BoundedContext bc = (BoundedContext) object;
+
+        return new EqualsBuilder()
+                .append(name, bc.name)
+                .isEquals();
     }
 
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder()
+                .append(name)
+                .hashCode();
+    }
 }

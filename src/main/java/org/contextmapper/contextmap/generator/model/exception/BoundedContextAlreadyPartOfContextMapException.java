@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.contextmapper.contextmap.generator.model;
+package org.contextmapper.contextmap.generator.model.exception;
 
-public class BoundedContextNotPartOfContextMapException extends RuntimeException {
+public class BoundedContextAlreadyPartOfContextMapException extends RuntimeException {
 
-    public BoundedContextNotPartOfContextMapException(BoundedContext boundedContext) {
-        super("The Bounded Context '" + boundedContext.getName() + "' is not part of the Context Map!");
+    public BoundedContextAlreadyPartOfContextMapException(String boundedContextName) {
+        super("The Bounded Context '" + boundedContextName + "' is already part of this Context Map.");
     }
 
 }

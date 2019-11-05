@@ -15,6 +15,11 @@
  */
 package org.contextmapper.contextmap.generator.model;
 
+/**
+ * Represents a DDD Partnership relationship on a Context Map.
+ *
+ * @author Stefan Kapferer
+ */
 public class Partnership implements Relationship {
 
     private BoundedContext bc1;
@@ -25,10 +30,20 @@ public class Partnership implements Relationship {
         this.bc2 = bc2;
     }
 
+    /**
+     * Gets the first participant of the Partnership.
+     *
+     * @return the first participant of the Partnership
+     */
     public BoundedContext getFirstParticipant() {
         return bc1;
     }
 
+    /**
+     * Gets the second participant of the Partnership.
+     *
+     * @return the second participant of the Partnership
+     */
     public BoundedContext getSecondParticipant() {
         return bc2;
     }

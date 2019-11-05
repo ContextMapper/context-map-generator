@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.contextmapper.contextmap.generator.graphviz;
+package org.contextmapper.contextmap.generator;
 
+import org.contextmapper.contextmap.generator.ContextMapGenerator;
 import org.contextmapper.contextmap.generator.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,39 +42,39 @@ public class ContextMapGeneratorTest {
     @Test
     public void canGenerateContextMap() throws IOException {
         // given
-        ContextMap map = new ContextMap();
         BoundedContext customerManagement = new BoundedContext("Customer Management Context");
         BoundedContext customerSelfService = new BoundedContext("Customer Self-Service Context");
         BoundedContext printing = new BoundedContext("Printing Context");
         BoundedContext debtCollection = new BoundedContext("Debt Collection Context");
         BoundedContext policyManagement = new BoundedContext("Policy Management Context");
         BoundedContext riskManagement = new BoundedContext("Risk Management Context");
-        map.addBoundedContext(customerManagement);
-        map.addBoundedContext(customerSelfService);
-        map.addBoundedContext(printing);
-        map.addBoundedContext(debtCollection);
-        map.addBoundedContext(policyManagement);
-        map.addBoundedContext(riskManagement);
-        map.addRelationship(new UpstreamDownstreamRelationship(customerManagement, customerSelfService));
-        map.addRelationship(new UpstreamDownstreamRelationship(printing, customerManagement)
-                .setUpstreamPatterns(OPEN_HOST_SERVICE, PUBLISHED_LANGUAGE)
-                .setDownstreamPatterns(ANTICORRUPTION_LAYER));
-        map.addRelationship(new UpstreamDownstreamRelationship(printing, policyManagement)
-                .setUpstreamPatterns(OPEN_HOST_SERVICE, PUBLISHED_LANGUAGE)
-                .setDownstreamPatterns(ANTICORRUPTION_LAYER));
-        map.addRelationship(new UpstreamDownstreamRelationship(printing, debtCollection)
-                .setUpstreamPatterns(OPEN_HOST_SERVICE, PUBLISHED_LANGUAGE)
-                .setDownstreamPatterns(ANTICORRUPTION_LAYER));
-        map.addRelationship(new SharedKernel(debtCollection, policyManagement));
-        map.addRelationship(new UpstreamDownstreamRelationship(customerManagement, policyManagement)
-                .setUpstreamPatterns(OPEN_HOST_SERVICE, PUBLISHED_LANGUAGE)
-                .setDownstreamPatterns(CONFORMIST));
-        map.addRelationship(new Partnership(riskManagement, policyManagement));
+
+        ContextMap map = new ContextMap()
+                .addBoundedContext(customerManagement)
+                .addBoundedContext(customerSelfService)
+                .addBoundedContext(printing)
+                .addBoundedContext(debtCollection)
+                .addBoundedContext(policyManagement)
+                .addBoundedContext(riskManagement)
+                .addRelationship(new UpstreamDownstreamRelationship(customerManagement, customerSelfService))
+                .addRelationship(new UpstreamDownstreamRelationship(printing, customerManagement)
+                        .setUpstreamPatterns(OPEN_HOST_SERVICE, PUBLISHED_LANGUAGE)
+                        .setDownstreamPatterns(ANTICORRUPTION_LAYER))
+                .addRelationship(new UpstreamDownstreamRelationship(printing, policyManagement)
+                        .setUpstreamPatterns(OPEN_HOST_SERVICE, PUBLISHED_LANGUAGE)
+                        .setDownstreamPatterns(ANTICORRUPTION_LAYER))
+                .addRelationship(new UpstreamDownstreamRelationship(printing, debtCollection)
+                        .setUpstreamPatterns(OPEN_HOST_SERVICE, PUBLISHED_LANGUAGE)
+                        .setDownstreamPatterns(ANTICORRUPTION_LAYER))
+                .addRelationship(new SharedKernel(debtCollection, policyManagement))
+                .addRelationship(new UpstreamDownstreamRelationship(customerManagement, policyManagement)
+                        .setUpstreamPatterns(OPEN_HOST_SERVICE, PUBLISHED_LANGUAGE)
+                        .setDownstreamPatterns(CONFORMIST))
+                .addRelationship(new Partnership(riskManagement, policyManagement));
 
         // when
-        ContextMapGenerator generator = new ContextMapGenerator();
         assertFalse(new File(CONTEXT_MAP_FILE).exists());
-        generator.generateContextMapGraphic(map, CONTEXT_MAP_FILE);
+        new ContextMapGenerator().generateContextMapGraphic(map, CONTEXT_MAP_FILE);
 
         // then
         assertTrue(new File(CONTEXT_MAP_FILE).exists());

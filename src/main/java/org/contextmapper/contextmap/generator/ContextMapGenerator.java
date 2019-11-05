@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.contextmapper.contextmap.generator.graphviz;
+package org.contextmapper.contextmap.generator;
 
 import guru.nidi.graphviz.attribute.Label;
 import guru.nidi.graphviz.attribute.Shape;
@@ -35,7 +35,7 @@ import static guru.nidi.graphviz.attribute.Attributes.attr;
 import static guru.nidi.graphviz.model.Factory.*;
 
 /**
- * Generating Context Map with graphviz. Experimental state!
+ * Generating graphical Context Map with Graphviz.
  *
  * @author Stefan Kapferer
  */
@@ -49,18 +49,18 @@ public class ContextMapGenerator {
 
         // create nodes
         contextMap.getBoundedContexts().forEach(bc -> {
-            MutableNode node = mutNode(bc.getId());
+            MutableNode node = mutNode(bc.getName());
             node.add(Label.lines(bc.getName()));
             node.add(Shape.EGG);
             node.add(attr("margin", "0.3"));
             node.add(attr("orientation", orientationDegree()));
-            bcNodesMap.put(bc.getId(), node);
+            bcNodesMap.put(bc.getName(), node);
         });
 
         // link nodes
         contextMap.getRelationships().forEach(rel -> {
-            MutableNode node1 = this.bcNodesMap.get(rel.getFirstParticipant().getId());
-            MutableNode node2 = this.bcNodesMap.get(rel.getSecondParticipant().getId());
+            MutableNode node1 = this.bcNodesMap.get(rel.getFirstParticipant().getName());
+            MutableNode node2 = this.bcNodesMap.get(rel.getSecondParticipant().getName());
 
             if (rel instanceof Partnership) {
                 node1.addLink(to(node2).with(Label.of("Partnership")));
@@ -86,19 +86,6 @@ public class ContextMapGenerator {
         Graphviz.fromGraph(graph).width(2000).render(Format.PNG).toFile(new File(fileName));
         Graphviz.fromGraph(graph).width(2000).render(Format.DOT).toFile(new File(fileName + ".dot"));
     }
-
-    /*
-     * Select shape randomly
-     */
-    /*private Shape getShape() {
-        int selection = new Random().nextInt(2);
-        switch (selection) {
-            case 1:
-                return Shape.EGG;
-            default:
-                return Shape.ELLIPSE;
-        }
-    }*/
 
     /*
      * Generate random orientation degree

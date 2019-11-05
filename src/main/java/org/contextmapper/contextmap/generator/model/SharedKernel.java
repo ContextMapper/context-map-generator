@@ -15,6 +15,11 @@
  */
 package org.contextmapper.contextmap.generator.model;
 
+/**
+ * Represents a DDD Shared Kernel relationship on a Context Map.
+ *
+ * @author Stefan Kapferer
+ */
 public class SharedKernel implements Relationship {
 
     private BoundedContext bc1;
@@ -25,10 +30,20 @@ public class SharedKernel implements Relationship {
         this.bc2 = bc2;
     }
 
+    /**
+     * Gets the first participant of the Shared Kernel.
+     *
+     * @return the first participant of the Shared Kernel
+     */
     public BoundedContext getFirstParticipant() {
         return bc1;
     }
 
+    /**
+     * Gets the second participant of the Shared Kernel.
+     *
+     * @return the second participant of the Shared Kernel
+     */
     public BoundedContext getSecondParticipant() {
         return bc2;
     }

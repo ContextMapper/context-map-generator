@@ -12,9 +12,11 @@ repositories {
 }
 
 dependencies {
-    compile group: 'guru.nidi', name: 'graphviz-java', version: '0.11.0'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.5.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.5.2'
+    implementation "guru.nidi:graphviz-java:${graphvizVersion}"
+    implementation "org.apache.commons:commons-lang3:${commonsLangVersion}"
+
+    testImplementation "org.junit.jupiter:junit-jupiter-api:${jUnitVersion}"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${jUnitVersion}"
 }
 
 test {
