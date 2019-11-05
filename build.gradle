@@ -1,11 +1,33 @@
-plugins {
-    id 'java'
+import java.text.SimpleDateFormat
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'org.standardout:bnd-platform:1.7.0'
+        classpath 'com.github.missedone:gradle-bintray-p2-plugin:1.2.0'
+    }
 }
 
+plugins {
+    id 'java'
+    id 'jacoco'
+    id 'maven-publish'
+    id 'signing'
+    id 'nebula.release' version '13.0.0'
+}
+
+apply plugin: 'org.standardout.bnd-platform'
+apply plugin: 'bintray-p2'
+
 group 'org.contextmapper'
-version '1.0.0-SNAPSHOT'
 
 sourceCompatibility = 1.8
+
+if (!project.hasProperty('signing.secretKeyRingFile')) {
+    project.ext.'signing.secretKeyRingFile' = "${rootDir}/secret-key.gpg"
+}
 
 repositories {
     mavenCentral()
@@ -19,6 +41,180 @@ dependencies {
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${jUnitVersion}"
 }
 
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allJava
+    archiveClassifier = 'sources'
+}
+
+task javadocJar(type: Jar) {
+    from javadoc
+    archiveClassifier = 'javadoc'
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+signing {
+    sign configurations.archives
+    required { gradle.taskGraph.hasTask("publishMavenJavaPublicationToMavenLocal") || gradle.taskGraph.hasTask("publishMavenJavaPublicationToMavenRepository") }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            customizePom(pom)
+
+            artifactId = "${project.name}"
+            groupId = "${project.group}"
+            version = "${project.version}"
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+
+            pom.withXml {
+                def pomFile = file("${project.buildDir}/generated-pom.xml")
+                writeTo(pomFile)
+                def pomAscFile = signing.sign(pomFile).signatureFiles[0]
+                artifact(pomAscFile) {
+                    classifier = null
+                    extension = 'pom.asc'
+                }
+            }
+
+            signArchives.signatures.each { signature ->
+                artifact(signature) {
+                    def matcher = signature.file =~ /-(sources|javadoc)\.jar\.asc$/
+                    if (matcher.find()) {
+                        classifier = matcher.group(1)
+                    } else {
+                        classifier = null
+                    }
+                    extension = signature.type
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            def releasesRepoUrl = "${ossReleaseStagingRepository}"
+            def snapshotsRepoUrl = "${ossSnapshotRepository}"
+            url = project.version.toString().endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+
+            credentials {
+                username = System.getenv('OSSRH_USERNAME')
+                password = System.getenv('OSSRH_PASSWORD')
+            }
+        }
+    }
+}
+
+def customizePom(pom) {
+    pom.withXml {
+        def root = asNode()
+
+        // eliminate test-scoped dependencies
+        root.dependencies.removeAll { dep ->
+            dep.scope == "test"
+        }
+
+        root.children().last() + {
+            resolveStrategy = Closure.DELEGATE_FIRST
+
+            description 'A graphical DDD Context Map generator on the basis of Graphviz'
+            name 'Context Map Generator'
+            url 'https://github.com/ContextMapper/context-map-generator'
+            organization {
+                name 'Context Mapper'
+                url 'https://contextmapper.org/'
+            }
+            issueManagement {
+                system 'GitHub'
+                url 'https://github.com/ContextMapper/context-map-generator/issues'
+            }
+            licenses {
+                license {
+                    name 'Apache License 2.0'
+                    url 'https://github.com/ContextMapper/context-map-generator/blob/master/LICENSE'
+                    distribution 'repo'
+                }
+            }
+            scm {
+                url 'https://github.com/ContextMapper/context-map-generator'
+                connection 'scm:git:git://github.com/ContextMapper/context-map-generator.git'
+                developerConnection 'scm:git:ssh://git@github.com:ContextMapper/context-map-generator.git'
+            }
+            developers {
+                developer {
+                    name 'Stefan Kapferer'
+                    email 'stefan@contextmapper.org'
+                }
+            }
+        }
+    }
+}
+
+defaultTasks 'updateSiteZip'
+updateSiteZip.dependsOn clean
+build.finalizedBy(updateSiteZip)
+
+platform {
+
+    bundle "org.contextmapper:context-map-generator:${version}", {
+        bnd {
+            symbolicName = 'org.contextmapper.contextmap.generator'
+            bundleName = 'context-map-generator'
+            instruction 'Bundle-Vendor', 'Context Mapper'
+            version = version
+        }
+    }
+
+    featureId 'org.contextmapper.contextmap.generator.feature'
+    featureName 'ContextMappers Context Map Generator'
+    featureVersion project.version.toString().endsWith('SNAPSHOT') ? project.version.toString().replace("SNAPSHOT", "") + new SimpleDateFormat("YYYYMMddHHmmss").format(new Date()) : project.version.toString()
+    featureProvider 'Context Mapper'
+
+    categoryName 'Context Map Generator'
+    categoryId 'org.contextmapper.contextmap.generator'
+
+    useBndHashQualifiers false
+    useFeatureHashQualifiers false
+    defaultQualifier new SimpleDateFormat("YYYYMMddHHmmss").format(new Date())
+}
+
+publishP2Repo {
+    repoOwner = 'contextmapper'
+    repoName = project.version.toString().endsWith('SNAPSHOT') ? 'context-map-generator-snapshots' : 'context-map-generator-releases'
+    mainFeatureId = 'org.contextmapper.contextmap.generator.feature'
+    compositePackage = ''
+    subCompositeStrategy = 'MICRO'
+    apiKey = System.getenv('BINTRAY_API_KEY')
+    user = System.getenv('BINTRAY_USERNAME')
+}
+
+publish.finalizedBy(publishP2Repo)
+
 test {
     useJUnitPlatform()
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        html.enabled false
+    }
+}
+
+check.dependsOn jacocoTestReport
+
+model {
+    tasks.generatePomFileForMavenJavaPublication {
+        destination = file("$buildDir/generated-pom.xml")
+    }
+    tasks.publishMavenJavaPublicationToMavenLocal {
+        dependsOn project.tasks.signArchives
+    }
+    tasks.publishMavenJavaPublicationToMavenRepository {
+        dependsOn project.tasks.signArchives
+    }
 }
