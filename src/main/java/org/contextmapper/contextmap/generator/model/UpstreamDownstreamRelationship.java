@@ -30,6 +30,7 @@ public class UpstreamDownstreamRelationship implements Relationship {
     private BoundedContext downstreamBoundedContext;
     private Set<UpstreamPatterns> upstreamPatterns;
     private Set<DownstreamPatterns> downstreamPatterns;
+    private boolean isCustomerSupplier = false;
 
     public UpstreamDownstreamRelationship(BoundedContext upstreamBoundedContext, BoundedContext downstreamBoundedContext) {
         this.upstreamBoundedContext = upstreamBoundedContext;
@@ -115,4 +116,24 @@ public class UpstreamDownstreamRelationship implements Relationship {
     public BoundedContext getSecondParticipant() {
         return downstreamBoundedContext;
     }
+
+    /**
+     * Sets if upstream-downstream relationship is a customer-supplier relationship (false by default).
+     *
+     * @param customerSupplier boolean whether relationship is a customer-supplier relationship or not
+     */
+    public UpstreamDownstreamRelationship setCustomerSupplier(boolean customerSupplier) {
+        isCustomerSupplier = customerSupplier;
+        return this;
+    }
+
+    /**
+     * Gets whether the relationship is a customer-supplier relationship or not.
+     *
+     * @return true, if the relationship is a customer-supplier relationship. false, otherwise.
+     */
+    public boolean isCustomerSupplier() {
+        return isCustomerSupplier;
+    }
+
 }

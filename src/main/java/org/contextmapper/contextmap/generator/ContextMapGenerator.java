@@ -41,9 +41,67 @@ import static guru.nidi.graphviz.model.Factory.*;
  */
 public class ContextMapGenerator {
 
+    private static final String EDGE_SPACING_UNIT = "        ";
+
     private Map<String, MutableNode> bcNodesMap;
 
-    public void generateContextMapGraphic(ContextMap contextMap, String fileName) throws IOException {
+    protected int labelSpacingFactor = 1;
+    protected int height = 1500;
+    protected int width = 3600;
+    protected boolean useHeight = false;
+    protected boolean useWidth = true;
+
+    /**
+     * Defines how much spacing we add to push the edges apart from each other.
+     * Can be increased if the labels at the edges are overlapping.
+     *
+     * @param spacingFactor a factor from 1 to 20
+     */
+    public ContextMapGenerator setLabelSpacingFactor(int spacingFactor) {
+        if (spacingFactor < 1)
+            labelSpacingFactor = 1;
+        else if (spacingFactor > 20)
+            labelSpacingFactor = 20;
+        else
+            labelSpacingFactor = spacingFactor;
+        return this;
+    }
+
+    /**
+     * Fixes the height of the produced image.
+     * When you call this method, the width of the image will be determined flexibly.
+     *
+     * @param height the height the produced image must have
+     */
+    public ContextMapGenerator setHeight(int height) {
+        this.useHeight = true;
+        this.useWidth = false;
+        this.height = height;
+        return this;
+    }
+
+    /**
+     * Fixes the width of the produced image.
+     * When you call this method, the height of the image will be determined flexibly.
+     *
+     * @param width the width the produced image must have
+     */
+    public ContextMapGenerator setWidth(int width) {
+        this.useWidth = true;
+        this.useHeight = false;
+        this.width = width;
+        return this;
+    }
+
+    /**
+     * Generates the graphical Context Map.
+     *
+     * @param contextMap the {@link ContextMap} for which the graphical representation shall be generated
+     * @param format     the file format to be generated
+     * @param fileName   the target filename
+     * @throws IOException
+     */
+    public void generateContextMapGraphic(ContextMap contextMap, Format format, String fileName) throws IOException {
         this.bcNodesMap = new TreeMap<>();
         MutableGraph graph = mutGraph("ContextMapGraph");
 
@@ -54,6 +112,9 @@ public class ContextMapGenerator {
             node.add(Shape.EGG);
             node.add(attr("margin", "0.3"));
             node.add(attr("orientation", orientationDegree()));
+            node.add(attr("fontname", "sans-serif"));
+            node.add(attr("fontsize", "16"));
+            node.add(attr("style", "bold"));
             bcNodesMap.put(bc.getName(), node);
         });
 
@@ -63,14 +124,23 @@ public class ContextMapGenerator {
             MutableNode node2 = this.bcNodesMap.get(rel.getSecondParticipant().getName());
 
             if (rel instanceof Partnership) {
-                node1.addLink(to(node2).with(Label.of("Partnership")));
+                node1.addLink(to(node2).with(createLabel("Partnership"))
+                        .add(attr("fontname", "sans-serif"))
+                        .add(attr("style", "bold"))
+                        .add(attr("fontsize", "12")));
             } else if (rel instanceof SharedKernel) {
-                node1.addLink(to(node2).with(Label.of("Shared Kernel")));
+                node1.addLink(to(node2).with(createLabel("Shared Kernel"))
+                        .add(attr("fontname", "sans-serif"))
+                        .add(attr("style", "bold"))
+                        .add(attr("fontsize", "12")));
             } else {
                 UpstreamDownstreamRelationship upDownRel = (UpstreamDownstreamRelationship) rel;
                 node1.addLink(to(node2).with(
-                        (Label.of("              ")),
+                        createLabel(upDownRel.isCustomerSupplier() ? "Customer/Supplier" : ""),
                         attr("labeldistance", "0"),
+                        attr("fontname", "sans-serif"),
+                        attr("fontsize", "12"),
+                        attr("style", "bold"),
                         attr("headlabel", getEdgeHTMLLabel("D", downstreamPatternsToStrings(upDownRel.getDownstreamPatterns()))),
                         attr("taillabel", getEdgeHTMLLabel("U", upstreamPatternsToStrings(upDownRel.getUpstreamPatterns())))
                 ));
@@ -83,8 +153,22 @@ public class ContextMapGenerator {
         }
 
         // store file
-        Graphviz.fromGraph(graph).width(2000).render(Format.PNG).toFile(new File(fileName));
-        Graphviz.fromGraph(graph).width(2000).render(Format.DOT).toFile(new File(fileName + ".dot"));
+        if (useWidth)
+            Graphviz.fromGraph(graph).width(width).render(format).toFile(new File(fileName));
+        else
+            Graphviz.fromGraph(graph).height(height).render(format).toFile(new File(fileName));
+    }
+
+    private Label createLabel(String label) {
+        if (label != null && !"".equals(label))
+            return Label.of(label);
+
+        // create spacing for edges without label
+        String spacing = "";
+        for (int i = 1; i <= labelSpacingFactor; i++) {
+            spacing = spacing + EDGE_SPACING_UNIT;
+        }
+        return Label.of(spacing);
     }
 
     /*
@@ -108,7 +192,7 @@ public class ContextMapGenerator {
         String border = "0";
         if (patterns.size() > 0) {
             upstreamDownstreamCell = "<td bgcolor=\"white\" sides=\"r\">" + upstreamDownstreamLabel + "</td>";
-            patternCell = "<td sides=\"trbl\" bgcolor=\"white\"><font POINT-SIZE=\"5\">" + String.join(", ", patterns) + "</font></td>";
+            patternCell = "<td sides=\"trbl\" bgcolor=\"white\"><font>" + String.join(", ", patterns) + "</font></td>";
             border = "1";
         }
         return Label.html("<table cellspacing=\"0\" cellborder=\"" + border + "\" border=\"0\">\n" +

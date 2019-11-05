@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import static org.contextmapper.contextmap.generator.model.DownstreamPatterns.ANTICORRUPTION_LAYER;
 import static org.contextmapper.contextmap.generator.model.UpstreamPatterns.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class RelationshipTests {
 
@@ -75,6 +76,19 @@ public class RelationshipTests {
         List<String> downstreamPatterns = relationship.getDownstreamPatterns().stream().map(u -> u.toString()).collect(Collectors.toList());
         assertEquals("OHS, PL", String.join(", ", upstreamPatterns.toArray(new String[upstreamPatterns.size()])));
         assertEquals("ACL", String.join(", ", downstreamPatterns.toArray(new String[downstreamPatterns.size()])));
+    }
+
+    @Test
+    public void canDefineCustomerSupplierRelationship() {
+        // given
+        BoundedContext customer = new BoundedContext("Customer");
+        BoundedContext supplier = new BoundedContext("Supplier");
+
+        // when
+        UpstreamDownstreamRelationship customerSupplier = new UpstreamDownstreamRelationship(supplier, customer).setCustomerSupplier(true);
+
+        // then
+        assertTrue(customerSupplier.isCustomerSupplier());
     }
 
 }

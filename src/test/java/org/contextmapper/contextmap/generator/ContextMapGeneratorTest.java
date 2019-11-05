@@ -15,33 +15,156 @@
  */
 package org.contextmapper.contextmap.generator;
 
-import org.contextmapper.contextmap.generator.ContextMapGenerator;
+import guru.nidi.graphviz.engine.Format;
 import org.contextmapper.contextmap.generator.model.*;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
 
-import static org.contextmapper.contextmap.generator.model.DownstreamPatterns.*;
-import static org.contextmapper.contextmap.generator.model.UpstreamPatterns.*;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.contextmapper.contextmap.generator.model.DownstreamPatterns.ANTICORRUPTION_LAYER;
+import static org.contextmapper.contextmap.generator.model.DownstreamPatterns.CONFORMIST;
+import static org.contextmapper.contextmap.generator.model.UpstreamPatterns.OPEN_HOST_SERVICE;
+import static org.contextmapper.contextmap.generator.model.UpstreamPatterns.PUBLISHED_LANGUAGE;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ContextMapGeneratorTest {
 
-    private static final String CONTEXT_MAP_FILE = "./src-gen/contextmap.png";
+    private static final String CONTEXT_MAP_FILE_FIXED_WIDTH = "./src-gen/contextmap-width.png";
+    private static final String CONTEXT_MAP_FILE_FIXED_HEIGHT = "./src-gen/contextmap-height.png";
+    private static final String CONTEXT_MAP_FILE_DOT_FORMAT = "./src-gen/contextmap.dot";
+    private static final String CONTEXT_MAP_FILE_SVG_FORMAT = "./src-gen/contextmap.svg";
 
-    @BeforeEach
-    void prepare() {
-        File contextMapFile = new File(CONTEXT_MAP_FILE);
-        if (contextMapFile.exists())
-            contextMapFile.delete();
+    @BeforeAll
+    static void prepare() {
+        deleteFileIfExisting(CONTEXT_MAP_FILE_FIXED_WIDTH);
+        deleteFileIfExisting(CONTEXT_MAP_FILE_FIXED_HEIGHT);
+        deleteFileIfExisting(CONTEXT_MAP_FILE_DOT_FORMAT);
+        deleteFileIfExisting(CONTEXT_MAP_FILE_SVG_FORMAT);
+    }
+
+    static void deleteFileIfExisting(String filename) {
+        File file = new File(filename);
+        if (file.exists())
+            file.delete();
     }
 
     @Test
-    public void canGenerateContextMap() throws IOException {
+    public void canGenerateContextMapWithFixedWith() throws IOException {
         // given
+        ContextMapGenerator generator = new ContextMapGenerator();
+
+        // when
+        assertFalse(new File(CONTEXT_MAP_FILE_FIXED_WIDTH).exists());
+        generator.setLabelSpacingFactor(10)
+                .setWidth(3600)
+                .generateContextMapGraphic(createTestContextMap(), Format.PNG, CONTEXT_MAP_FILE_FIXED_WIDTH);
+
+        // then
+        assertTrue(new File(CONTEXT_MAP_FILE_FIXED_WIDTH).exists());
+    }
+
+    @Test
+    public void canGenerateContextMapWithFixedHeight() throws IOException {
+        // given
+        ContextMapGenerator generator = new ContextMapGenerator();
+
+        // when
+        assertFalse(new File(CONTEXT_MAP_FILE_DOT_FORMAT).exists());
+        assertFalse(new File(CONTEXT_MAP_FILE_SVG_FORMAT).exists());
+        generator.setLabelSpacingFactor(10)
+                .setHeight(3600)
+                .generateContextMapGraphic(createTestContextMap(), Format.DOT, CONTEXT_MAP_FILE_DOT_FORMAT);
+        generator.setLabelSpacingFactor(10)
+                .setHeight(3600)
+                .generateContextMapGraphic(createTestContextMap(), Format.SVG, CONTEXT_MAP_FILE_SVG_FORMAT);
+
+        // then
+        assertTrue(new File(CONTEXT_MAP_FILE_DOT_FORMAT).exists());
+        assertTrue(new File(CONTEXT_MAP_FILE_SVG_FORMAT).exists());
+    }
+
+    @Test
+    public void canGenerateInOtherFormatsThenPNG() throws IOException {
+        // given
+        ContextMapGenerator generator = new ContextMapGenerator();
+
+        // when
+        assertFalse(new File(CONTEXT_MAP_FILE_FIXED_HEIGHT).exists());
+        generator.setLabelSpacingFactor(10)
+                .setWidth(3600)
+                .generateContextMapGraphic(createTestContextMap(), Format.PNG, CONTEXT_MAP_FILE_FIXED_HEIGHT);
+
+        // then
+        assertTrue(new File(CONTEXT_MAP_FILE_FIXED_HEIGHT).exists());
+    }
+
+    @Test
+    public void canFixWidth() {
+        // given
+        ContextMapGenerator generator = new ContextMapGenerator();
+
+        // when
+        generator.setWidth(4000);
+
+        // then
+        assertFalse(generator.useHeight);
+        assertTrue(generator.useWidth);
+        assertEquals(4000, generator.width);
+    }
+
+    @Test
+    public void canFixHeight() {
+        // given
+        ContextMapGenerator generator = new ContextMapGenerator();
+
+        // when
+        generator.setHeight(4000);
+
+        // then
+        assertFalse(generator.useWidth);
+        assertTrue(generator.useHeight);
+        assertEquals(4000, generator.height);
+    }
+
+    @Test
+    public void canSetLabelSpacingFactor() {
+        // given
+        ContextMapGenerator generator = new ContextMapGenerator();
+
+        // when
+        generator.setLabelSpacingFactor(3);
+
+        // then
+        assertEquals(3, generator.labelSpacingFactor);
+    }
+
+    @Test
+    public void canHandleTooSmallSpacingFactor() {
+        // given
+        ContextMapGenerator generator = new ContextMapGenerator();
+
+        // when
+        generator.setLabelSpacingFactor(0);
+
+        // then
+        assertEquals(1, generator.labelSpacingFactor);
+    }
+
+    @Test
+    public void canHandleTooBigSpacingFactor() {
+        // given
+        ContextMapGenerator generator = new ContextMapGenerator();
+
+        // when
+        generator.setLabelSpacingFactor(21);
+
+        // then
+        assertEquals(20, generator.labelSpacingFactor);
+    }
+
+    private ContextMap createTestContextMap() {
         BoundedContext customerManagement = new BoundedContext("Customer Management Context");
         BoundedContext customerSelfService = new BoundedContext("Customer Self-Service Context");
         BoundedContext printing = new BoundedContext("Printing Context");
@@ -49,14 +172,15 @@ public class ContextMapGeneratorTest {
         BoundedContext policyManagement = new BoundedContext("Policy Management Context");
         BoundedContext riskManagement = new BoundedContext("Risk Management Context");
 
-        ContextMap map = new ContextMap()
+        return new ContextMap()
                 .addBoundedContext(customerManagement)
                 .addBoundedContext(customerSelfService)
                 .addBoundedContext(printing)
                 .addBoundedContext(debtCollection)
                 .addBoundedContext(policyManagement)
                 .addBoundedContext(riskManagement)
-                .addRelationship(new UpstreamDownstreamRelationship(customerManagement, customerSelfService))
+                .addRelationship(new UpstreamDownstreamRelationship(customerManagement, customerSelfService)
+                        .setCustomerSupplier(true))
                 .addRelationship(new UpstreamDownstreamRelationship(printing, customerManagement)
                         .setUpstreamPatterns(OPEN_HOST_SERVICE, PUBLISHED_LANGUAGE)
                         .setDownstreamPatterns(ANTICORRUPTION_LAYER))
@@ -71,13 +195,6 @@ public class ContextMapGeneratorTest {
                         .setUpstreamPatterns(OPEN_HOST_SERVICE, PUBLISHED_LANGUAGE)
                         .setDownstreamPatterns(CONFORMIST))
                 .addRelationship(new Partnership(riskManagement, policyManagement));
-
-        // when
-        assertFalse(new File(CONTEXT_MAP_FILE).exists());
-        new ContextMapGenerator().generateContextMapGraphic(map, CONTEXT_MAP_FILE);
-
-        // then
-        assertTrue(new File(CONTEXT_MAP_FILE).exists());
     }
 
 }
