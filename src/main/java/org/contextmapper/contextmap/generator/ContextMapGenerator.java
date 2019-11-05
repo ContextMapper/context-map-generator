@@ -160,7 +160,7 @@ public class ContextMapGenerator {
     }
 
     private Label createLabel(String label) {
-        if (label != null && !"".equals(label))
+        if (!"".equals(label))
             return Label.of(label);
 
         // create spacing for edges without label
