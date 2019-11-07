@@ -21,7 +21,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
 import static org.contextmapper.contextmap.generator.model.DownstreamPatterns.ANTICORRUPTION_LAYER;
 import static org.contextmapper.contextmap.generator.model.DownstreamPatterns.CONFORMIST;
@@ -31,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class ContextMapGeneratorTest {
 
+    private static final String CONTEXT_MAP_FILE = "./src-gen/contextmap.png";
     private static final String CONTEXT_MAP_FILE_FIXED_WIDTH = "./src-gen/contextmap-width.png";
     private static final String CONTEXT_MAP_FILE_FIXED_HEIGHT = "./src-gen/contextmap-height.png";
     private static final String CONTEXT_MAP_FILE_DOT_FORMAT = "./src-gen/contextmap.dot";
@@ -38,6 +41,7 @@ public class ContextMapGeneratorTest {
 
     @BeforeAll
     static void prepare() {
+        deleteFileIfExisting(CONTEXT_MAP_FILE);
         deleteFileIfExisting(CONTEXT_MAP_FILE_FIXED_WIDTH);
         deleteFileIfExisting(CONTEXT_MAP_FILE_FIXED_HEIGHT);
         deleteFileIfExisting(CONTEXT_MAP_FILE_DOT_FORMAT);
@@ -48,6 +52,23 @@ public class ContextMapGeneratorTest {
         File file = new File(filename);
         if (file.exists())
             file.delete();
+    }
+
+    @Test
+    public void canGenerateContextMapByOutputstream() throws IOException {
+        // given
+        ContextMapGenerator generator = new ContextMapGenerator();
+
+        // when
+        assertFalse(new File(CONTEXT_MAP_FILE).exists());
+        OutputStream outputStream = new FileOutputStream(new File(CONTEXT_MAP_FILE));
+        generator.setLabelSpacingFactor(10)
+                .setWidth(3600)
+                .generateContextMapGraphic(createTestContextMap(), Format.PNG, outputStream);
+        outputStream.close();
+
+        // then
+        assertTrue(new File(CONTEXT_MAP_FILE).exists());
     }
 
     @Test

@@ -25,6 +25,7 @@ import org.contextmapper.contextmap.generator.model.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -102,6 +103,34 @@ public class ContextMapGenerator {
      * @throws IOException
      */
     public void generateContextMapGraphic(ContextMap contextMap, Format format, String fileName) throws IOException {
+        MutableGraph graph = createGraph(contextMap);
+
+        // store file
+        if (useWidth)
+            Graphviz.fromGraph(graph).width(width).render(format).toFile(new File(fileName));
+        else
+            Graphviz.fromGraph(graph).height(height).render(format).toFile(new File(fileName));
+    }
+
+    /**
+     * Generates the graphical Context Map.
+     *
+     * @param contextMap   the {@link ContextMap} for which the graphical representation shall be generated
+     * @param format       the file format to be generated
+     * @param outputStream the outputstream to which the image is written
+     * @throws IOException
+     */
+    public void generateContextMapGraphic(ContextMap contextMap, Format format, OutputStream outputStream) throws IOException {
+        MutableGraph graph = createGraph(contextMap);
+
+        // store file
+        if (useWidth)
+            Graphviz.fromGraph(graph).width(width).render(format).toOutputStream(outputStream);
+        else
+            Graphviz.fromGraph(graph).height(height).render(format).toOutputStream(outputStream);
+    }
+
+    private MutableGraph createGraph(ContextMap contextMap) {
         this.bcNodesMap = new TreeMap<>();
         MutableGraph graph = mutGraph("ContextMapGraph");
 
@@ -151,12 +180,7 @@ public class ContextMapGenerator {
         for (MutableNode node : this.bcNodesMap.values()) {
             graph.add(node);
         }
-
-        // store file
-        if (useWidth)
-            Graphviz.fromGraph(graph).width(width).render(format).toFile(new File(fileName));
-        else
-            Graphviz.fromGraph(graph).height(height).render(format).toFile(new File(fileName));
+        return graph;
     }
 
     private Label createLabel(String label) {

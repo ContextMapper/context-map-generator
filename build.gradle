@@ -33,8 +33,11 @@ repositories {
 }
 
 dependencies {
-    implementation "guru.nidi:graphviz-java:${graphvizVersion}"
     implementation "org.apache.commons:commons-lang3:${commonsLangVersion}"
+    implementation "guru.nidi.com.kitfox:svgSalamander:1.1.2"
+    implementation "org.apache.commons:commons-exec:1.3"
+    implementation "com.google.code.findbugs:jsr305:3.0.2"
+    implementation "org.slf4j:slf4j-api:1.7.26"
 
     testImplementation "org.junit.jupiter:junit-jupiter-api:${jUnitVersion}"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${jUnitVersion}"
@@ -166,36 +169,14 @@ platform {
             instruction 'Bundle-Vendor', 'Context Mapper'
             version = version
         }
-    }
-
-    bundle(group: 'guru.nidi', name: 'graphviz-java', version: graphvizVersion) {
-        bnd {
-            instruction 'Import-Package', "!org.graalvm.polyglot,*"
-        }
-    }
-
-    bundle(group: 'com.eclipsesource.j2v8', name: 'j2v8_linux_x86_64', version: '4.6.0') {
-        bnd {
-        }
-    }
-
-    bundle(group: 'com.eclipsesource.j2v8', name: 'j2v8_macosx_x86_64', version: '4.6.0') {
-        bnd {
-        }
-    }
-
-    bundle(group: 'com.eclipsesource.j2v8', name: 'j2v8_win32_x86', version: '4.6.0') {
-        bnd {
-        }
-    }
-
-    bundle(group: 'com.eclipsesource.j2v8', name: 'j2v8_win32_x86_64', version: '4.6.0') {
-        bnd {
-        }
+        exclude module: 'slf4j-api'
+        exclude module: 'jcl-over-slf4j'
+        exclude module: 'jul-to-slf4j'
+        exclude module: 'commons-logging'
     }
 
     featureId 'org.contextmapper.contextmap.generator.feature'
-    featureName 'ContextMappers Context Map Generator'
+    featureName 'Context Map Generator'
     featureVersion project.version.toString().endsWith('SNAPSHOT') ? project.version.toString().replace("SNAPSHOT", "") + new SimpleDateFormat("YYYYMMddHHmmss").format(new Date()) : project.version.toString()
     featureProvider 'Context Mapper'
 
