@@ -77,7 +77,7 @@ new ContextMapGenerator().setLabelSpacingFactor(10)
 
 The program above generates the following Context Map:
 
-<a href="https://raw.githubusercontent.com/ContextMapper/context-map-generator/master/context-map-example.png" target="_blank"><img src="https://raw.githubusercontent.com/ContextMapper/context-map-generator/master/context-map-example.png" alt="Example Context Map" /></a>
+<a href="https://raw.githubusercontent.com/ContextMapper/context-map-generator/master/context-map-example-1.png" target="_blank"><img src="https://raw.githubusercontent.com/ContextMapper/context-map-generator/master/context-map-example-1.png" alt="Example Context Map" /></a>
 
 ## Parameters
 With the following methods you can parameterize the `ContextMapGenerator`:
