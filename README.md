@@ -26,9 +26,10 @@ implementation 'org.contextmapper:context-map-generator:1.0.0'
 ### Preconditions
 **Important note:** The generator requires [Graphviz](https://www.graphviz.org/) to be installed on the machine on which you run it.
 
-## Example
-The following Java programm illustrates how you can create a Context Map (png file in this case):
+## Examples
+The following Java programs illustrates how you can create a Context Map (png file in these cases). They generate Context Maps for our [insurance example](https://github.com/ContextMapper/context-mapper-examples/tree/master/src/main/cml/insurance-example) and the [DDD "Cargo" sample application](https://github.com/ContextMapper/context-mapper-examples/tree/master/src/main/cml/ddd-sample) (CML examples can be found in our [examples repository](https://github.com/ContextMapper/context-mapper-examples)).
 
+### Insurance Example
 ```java
 BoundedContext customerManagement = new BoundedContext("Customer Management Context");
 BoundedContext customerSelfService = new BoundedContext("Customer Self-Service Context");
@@ -78,6 +79,32 @@ new ContextMapGenerator().setLabelSpacingFactor(10)
 The program above generates the following Context Map:
 
 <a href="https://raw.githubusercontent.com/ContextMapper/context-map-generator/master/context-map-example-1.png" target="_blank"><img src="https://raw.githubusercontent.com/ContextMapper/context-map-generator/master/context-map-example-1.png" alt="Example Context Map" /></a>
+
+### DDD "Cargo" Sample Application
+```java
+BoundedContext cargoBookingContext = new BoundedContext("Cargo Booking Context");
+BoundedContext voyagePlanningContext = new BoundedContext("Voyage Planning Context");
+BoundedContext locationContext = new BoundedContext("Location Context");
+
+ContextMap contextMap = new ContextMap()
+  .addBoundedContext(cargoBookingContext)
+  .addBoundedContext(voyagePlanningContext)
+  .addBoundedContext(locationContext)
+
+  .addRelationship(new SharedKernel(cargoBookingContext, voyagePlanningContext))
+  .addRelationship(new UpstreamDownstreamRelationship(locationContext, cargoBookingContext)
+    .setUpstreamPatterns(OPEN_HOST_SERVICE, PUBLISHED_LANGUAGE))
+  .addRelationship(new UpstreamDownstreamRelationship(locationContext, voyagePlanningContext)
+    .setUpstreamPatterns(OPEN_HOST_SERVICE, PUBLISHED_LANGUAGE));
+
+// generate the Context Map
+new ContextMapGenerator().setLabelSpacingFactor(10)
+  .generateContextMapGraphic(contextMap, Format.PNG, "/home/user/myContextMap.png");
+```
+
+The result:
+
+<a href="https://raw.githubusercontent.com/ContextMapper/context-map-generator/master/context-map-example-2.png" target="_blank"><img src="https://raw.githubusercontent.com/ContextMapper/context-map-generator/master/context-map-example-2.png" alt="Example Context Map" /></a>
 
 ## Parameters
 With the following methods you can parameterize the `ContextMapGenerator`:
