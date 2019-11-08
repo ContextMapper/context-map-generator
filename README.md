@@ -24,7 +24,7 @@ implementation 'org.contextmapper:context-map-generator:1.0.0'
 ```
 
 ### Preconditions
-**Important note:** The generator requires [Graphviz](https://www.graphviz.org/) to be installed on the machine on which you run it.
+**Important note:** The generator requires [Graphviz](https://www.graphviz.org/) to be installed on the machine on which you run it. Ensure that the [Graphviz](https://www.graphviz.org/) binaries are part of your **PATH** environment variable (**especially on Windows since the installer does not add it automatically**; the path to be added to the PATH variable is typically `C:\Program Files (x86)\GraphvizX.XX\bin`).
 
 ## Examples
 The following Java programs illustrates how you can create a Context Map (png file in these cases). They generate Context Maps for our [insurance example](https://github.com/ContextMapper/context-mapper-examples/tree/master/src/main/cml/insurance-example) and the [DDD "Cargo" sample application](https://github.com/ContextMapper/context-mapper-examples/tree/master/src/main/cml/ddd-sample) (CML examples can be found in our [examples repository](https://github.com/ContextMapper/context-mapper-examples)).
