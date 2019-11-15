@@ -63,7 +63,7 @@ public class ContextMapGeneratorTest {
         assertFalse(new File(CONTEXT_MAP_FILE).exists());
         OutputStream outputStream = new FileOutputStream(new File(CONTEXT_MAP_FILE));
         generator.setLabelSpacingFactor(10)
-                .setWidth(3600)
+                .setWidth(2000)
                 .generateContextMapGraphic(createTestContextMap(), Format.PNG, outputStream);
         outputStream.close();
 
@@ -79,7 +79,7 @@ public class ContextMapGeneratorTest {
         // when
         assertFalse(new File(CONTEXT_MAP_FILE_FIXED_WIDTH).exists());
         generator.setLabelSpacingFactor(10)
-                .setWidth(3600)
+                .setWidth(2000)
                 .generateContextMapGraphic(createTestContextMap(), Format.PNG, CONTEXT_MAP_FILE_FIXED_WIDTH);
 
         // then
@@ -95,10 +95,10 @@ public class ContextMapGeneratorTest {
         assertFalse(new File(CONTEXT_MAP_FILE_DOT_FORMAT).exists());
         assertFalse(new File(CONTEXT_MAP_FILE_SVG_FORMAT).exists());
         generator.setLabelSpacingFactor(10)
-                .setHeight(3600)
+                .setHeight(2000)
                 .generateContextMapGraphic(createTestContextMap(), Format.DOT, CONTEXT_MAP_FILE_DOT_FORMAT);
         generator.setLabelSpacingFactor(10)
-                .setHeight(3600)
+                .setHeight(2000)
                 .generateContextMapGraphic(createTestContextMap(), Format.SVG, CONTEXT_MAP_FILE_SVG_FORMAT);
 
         // then
@@ -114,7 +114,7 @@ public class ContextMapGeneratorTest {
         // when
         assertFalse(new File(CONTEXT_MAP_FILE_FIXED_HEIGHT).exists());
         generator.setLabelSpacingFactor(10)
-                .setWidth(3600)
+                .setWidth(2000)
                 .generateContextMapGraphic(createTestContextMap(), Format.PNG, CONTEXT_MAP_FILE_FIXED_HEIGHT);
 
         // then

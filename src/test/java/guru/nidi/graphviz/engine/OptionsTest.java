@@ -44,6 +44,23 @@ class OptionsTest {
     }
 
     @Test
+    void fromJsonOneImage() {
+        final Options options = Options.fromJson("{engine:'DOT',format:'PNG',images:["
+                + "{path:'" + uriPathOf(new File("./graphviz-test-example/ex1.png")) + "',width:'550px',height:'100px'}]}");
+        final Options expected = Options.create().engine(Engine.DOT).format(Format.PNG).image("graphviz-test-example/ex1.png");
+        assertEquals(expected, options);
+    }
+
+    @Test
+    void fromJsonTwoImages() {
+        final Options options = Options.fromJson("{engine:'DOT',format:'PNG',images:["
+                + "{path:'" + uriPathOf(new File("./graphviz-test-example/ex1.png")) + "',width:'550px',height:'100px'},"
+                + "{path:'" + uriPathOf(new File("./graphviz-test-example/ex2.png")) + "',width:'900px',height:'964px']}");
+        final Options expected = Options.create().engine(Engine.DOT).format(Format.PNG).image("graphviz-test-example/ex1.png").image("graphviz-test-example/ex2.png");
+        assertEquals(expected, options);
+    }
+
+    @Test
     void toJsonMinimal() {
         final String s = Options.create().engine(Engine.DOT).format(Format.PNG).toJson(false);
         assertEquals("{format:'svg',engine:'dot',basedir:'" + new File(".").getAbsolutePath() + "',images:[]}", s);
@@ -60,7 +77,15 @@ class OptionsTest {
     void toJsonOneImage() {
         final String s = Options.create().engine(Engine.DOT).format(Format.PNG).basedir(new File("graphviz-test-example")).image("ex1.png").toJson(false);
         assertEquals("{format:'svg',engine:'dot',basedir:'" + new File("graphviz-test-example").getAbsolutePath() + "',images:[" +
-                "{path:'" + uriPathOf(new File("graphviz-test-example/ex1.png")) + "',width:'548px',height:'100px'}]}", s);
+                "{path:'" + uriPathOf(new File("graphviz-test-example/ex1.png")) + "',width:'550px',height:'100px'}]}", s);
+    }
+
+    @Test
+    void toJsonTwoImages() {
+        final String s = Options.create().engine(Engine.DOT).format(Format.PNG).basedir(new File("graphviz-test-example")).image("ex1.png").image("ex2.png").toJson(false);
+        assertEquals("{format:'svg',engine:'dot',basedir:'" + new File("graphviz-test-example").getAbsolutePath() + "',images:["
+                + "{path:'" + uriPathOf(new File("graphviz-test-example/ex1.png")) + "',width:'550px',height:'100px'},"
+                + "{path:'" + uriPathOf(new File("graphviz-test-example/ex2.png")) + "',width:'900px',height:'964px'}]}", s);
     }
 
 }

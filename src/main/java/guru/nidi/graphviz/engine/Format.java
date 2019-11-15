@@ -24,22 +24,37 @@ import java.util.regex.Pattern;
 public enum Format {
     PNG("svg", "png", true, true) {
         @Override
-        EngineResult postProcess(EngineResult result, double fontAdjust) {
-            return result.mapString(s -> postProcessSvg(s, true, fontAdjust));
+        String preProcess(String src) {
+            return encodeXml(super.preProcess(src));
+        }
+
+        @Override
+        EngineResult postProcess(Graphviz graphviz, EngineResult result) {
+            return result.mapString(s -> postProcessSvg(graphviz, s, true));
         }
     },
 
     SVG("svg", "svg", false, true) {
         @Override
-        EngineResult postProcess(EngineResult result, double fontAdjust) {
-            return result.mapString(s -> postProcessSvg(s, true, fontAdjust));
+        String preProcess(String src) {
+            return encodeXml(super.preProcess(src));
+        }
+
+        @Override
+        EngineResult postProcess(Graphviz graphviz, EngineResult result) {
+            return result.mapString(s -> postProcessSvg(graphviz, s, true));
         }
     },
 
     SVG_STANDALONE("svg", "svg", false, true) {
         @Override
-        EngineResult postProcess(EngineResult result, double fontAdjust) {
-            return result.mapString(s -> postProcessSvg(s, false, fontAdjust));
+        String preProcess(String src) {
+            return encodeXml(super.preProcess(src));
+        }
+
+        @Override
+        EngineResult postProcess(Graphviz graphviz, EngineResult result) {
+            return result.mapString(s -> postProcessSvg(graphviz, s, false));
         }
     },
     DOT("dot", "dot", false, false),
@@ -57,9 +72,9 @@ public enum Format {
             "<svg width=\"(?<width>\\d+)(?<unit>p[tx])\" height=\"(?<height>\\d+)p[tx]\""
                     + "(?<between>.*?>\\R<g.*?)transform=\"scale\\((?<scaleX>[0-9.]+) (?<scaleY>[0-9.]+)\\)",
             Pattern.DOTALL);
-    private static final double PIXEL_PER_POINT = 1.3333;
+
     final String vizName;
-    final String fileExtension;
+    public final String fileExtension;
     final boolean image;
     final boolean svg;
 
@@ -70,34 +85,70 @@ public enum Format {
         this.svg = svg;
     }
 
-    EngineResult postProcess(EngineResult result, double fontAdjust) {
+    String preProcess(String src) {
+        return replaceSubSpaces(src);
+    }
+
+    EngineResult postProcess(Graphviz graphviz, EngineResult result) {
         return result;
     }
 
-    private static String postProcessSvg(String result, boolean prefix, double fontAdjust) {
-        final String unprefixed = prefix ? withoutPrefix(result) : result;
-        final String pixelSized = pointsToPixels(unprefixed);
-        return fontAdjust == 1 ? pixelSized : fontAdjusted(pixelSized, fontAdjust);
+    private static String replaceSubSpaces(String src) {
+        final char[] chars = src.toCharArray();
+        for (int i = 0; i < chars.length; i++) {
+            if (chars[i] < ' ' && chars[i] != '\t' && chars[i] != '\r' && chars[i] != '\n') {
+                chars[i] = ' ';
+            }
+        }
+        return new String(chars);
     }
 
-    private static String pointsToPixels(String svg) {
-        final Matcher m = SVG_PATTERN.matcher(svg);
-        if (!m.find()) {
-            LOG.warn("Generated SVG has not the expected format. There might be image size problems.");
-            return svg;
-        }
-        if (m.group("unit").equals("px")) {
-            return svg;
-        }
-        final double scaleX = Double.parseDouble(m.group("scaleX")) / PIXEL_PER_POINT;
-        final double scaleY = Double.parseDouble(m.group("scaleY")) / PIXEL_PER_POINT;
-        return m.replaceFirst("<svg width=\"" + m.group("width") + "px\" height=\"" + m.group("height") + "px\""
-                + m.group("between") + "transform=\"scale(" + scaleX + " " + scaleY + ")");
+    private static String encodeXml(String src) {
+        return src.replace("&", "&amp;");
+    }
+
+    private static String postProcessSvg(Graphviz graphviz, String result, boolean prefix) {
+        final String unprefixed = prefix ? withoutPrefix(result) : result;
+        final String pixelSized = pointsToPixels(unprefixed, graphviz.dpi(),
+                graphviz.width, graphviz.height, graphviz.scale);
+        return graphviz.fontAdjust == 1 ? pixelSized : fontAdjusted(pixelSized, graphviz.fontAdjust);
     }
 
     private static String withoutPrefix(String svg) {
         final int pos = svg.indexOf("<svg ");
         return pos < 0 ? svg : svg.substring(pos);
+    }
+
+    private static String pointsToPixels(String svg, double dpi, int width, int height, double scale) {
+        final Matcher m = SVG_PATTERN.matcher(svg);
+        if (!m.find()) {
+            LOG.warn("Generated SVG has not the expected format. There might be image size problems.");
+            return svg;
+        }
+        return m.replaceFirst("<svg " + svgSize(m, width, height, scale) + m.group("between") + svgScale(m, dpi));
+    }
+
+    private static String svgSize(Matcher m, int width, int height, double scale) {
+        double w = Integer.parseInt(m.group("width"));
+        double h = Integer.parseInt(m.group("height"));
+        if (width > 0 && height > 0) {
+            w = width;
+            h = height;
+        } else if (width > 0) {
+            h *= width / w;
+            w = width;
+        } else if (height > 0) {
+            w *= height / h;
+            h = height;
+        }
+        return "width=\"" + Math.round(w * scale) + "px\" height=\"" + Math.round(h * scale) + "px\"";
+    }
+
+    private static String svgScale(Matcher m, double dpi) {
+        final double pixelScale = m.group("unit").equals("px") ? 1 : Math.round(10000 * dpi / 72) / 10000d;
+        final double scaleX = Double.parseDouble(m.group("scaleX")) / pixelScale;
+        final double scaleY = Double.parseDouble(m.group("scaleY")) / pixelScale;
+        return "transform=\"scale(" + scaleX + " " + scaleY + ")";
     }
 
     private static String fontAdjusted(String svg, double fontAdjust) {

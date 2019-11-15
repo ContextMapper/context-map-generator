@@ -47,8 +47,8 @@ public class ContextMapGenerator {
     private Map<String, MutableNode> bcNodesMap;
 
     protected int labelSpacingFactor = 1;
-    protected int height = 1500;
-    protected int width = 3600;
+    protected int height = 1000;
+    protected int width = 2000;
     protected boolean useHeight = false;
     protected boolean useWidth = true;
 
