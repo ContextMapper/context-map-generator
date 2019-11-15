@@ -14,13 +14,13 @@ Therefore, you can easily include the library to your Maven or Gradle build:
 <dependency>
   <groupId>org.contextmapper</groupId>
   <artifactId>context-map-generator</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
 </dependency>
 ```
 
 **Gradle:**
 ```gradle
-implementation 'org.contextmapper:context-map-generator:1.0.0'
+implementation 'org.contextmapper:context-map-generator:1.0.1'
 ```
 
 ### Preconditions
@@ -111,8 +111,8 @@ With the following methods you can parameterize the `ContextMapGenerator`:
 
 | Method / Parameter                       | Description                                                                                                                                                                                                                                                                                                                                              | Default value |
 |------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
-| setHeight(int height)                    | By using this parameter you can fix the height of the produced image. Note that if you use fix the height, the width will be adjusted dynamically.                                                                                                                                                                                                       | 1500          |
-| setWidth(int width)                      | By using this parameter you can fix the width of the produced image. Note that if you use fix the width, the height will be adjusted dynamically.                                                                                                                                                                                                        | 3600          |
+| setHeight(int height)                    | By using this parameter you can fix the height of the produced image. Note that if you use fix the height, the width will be adjusted dynamically.                                                                                                                                                                                                       | 1000          |
+| setWidth(int width)                      | By using this parameter you can fix the width of the produced image. Note that if you use fix the width, the height will be adjusted dynamically.                                                                                                                                                                                                        | 2000          |
 | setLabelSpacingFactor(int spacingFactor) | The Graphviz layouting algorithm doesn't ensure that the labels of the edges do not overlap. Especially the boxes with the relationship patterns (OHS, PL, ACL, CF) may often overlap in our case. By introducing spacing between the edges we can often bypass this issue. This parameter (a factor between 1 and 20) controls how much spacing we add. | 1             |
 
 ## Supported Output Formats
