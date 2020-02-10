@@ -52,7 +52,7 @@ class ReadmeTest {
                         node("a").with(Color.RED).link(node("b")),
                         node("b").link(to(node("c")).with(Style.DASHED))
                 );
-        Graphviz.fromGraph(g).height(100).render(Format.PNG).toFile(new File("graphviz-test-example/ex1.png"));
+        Graphviz.fromGraph(g).height(100).width(550).render(Format.PNG).toFile(new File("graphviz-test-example/ex1.png"));
         //## end
     }
 
@@ -99,7 +99,7 @@ class ReadmeTest {
                         to(compare).with(Color.RED)),
                 init.link(mkString));
 
-        Graphviz.fromGraph(g).width(900).render(Format.PNG).toFile(new File("graphviz-test-example/ex2.png"));
+        Graphviz.fromGraph(g).width(900).height(969).render(Format.PNG).toFile(new File("graphviz-test-example/ex2.png"));
         //## end
     }
 
@@ -156,7 +156,7 @@ class ReadmeTest {
         Graphviz viz = Graphviz.fromGraph(g);
         viz.width(200).render(Format.SVG).toFile(new File("graphviz-test-example/ex5.svg"));
         viz.width(200).rasterize(Rasterizer.SALAMANDER).toFile(new File("graphviz-test-example/ex5s.png"));
-        viz.width(200).rasterize(Rasterizer.builtIn("pdf")).toFile(new File("graphviz-test-example/ex5p"));
+        viz.width(200).height(374).rasterize(Rasterizer.builtIn("pdf")).toFile(new File("graphviz-test-example/ex5p"));
         String dot = viz.render(Format.DOT).toString();
         String json = viz.engine(Engine.NEATO).render(Format.JSON).toString();
         BufferedImage image = viz.render(Format.PNG).toImage();
