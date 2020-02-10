@@ -35,7 +35,7 @@ import static guru.nidi.graphviz.model.Factory.*;
 class ReadmeTest {
     @BeforeAll
     static void init() {
-        Graphviz.useEngine(new GraphvizV8Engine(), new GraphvizJdkEngine());
+        Graphviz.useEngine(new GraphvizCmdLineEngine());
     }
 
     @AfterAll

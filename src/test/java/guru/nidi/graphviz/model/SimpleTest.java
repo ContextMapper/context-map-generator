@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 class SimpleTest {
     @BeforeAll
     static void init() {
-        Graphviz.useEngine(new GraphvizV8Engine(), new GraphvizJdkEngine());
+        Graphviz.useEngine(new GraphvizCmdLineEngine());
     }
 
     @AfterAll

@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class ContextTest {
     @BeforeAll
     static void init() {
-        Graphviz.useEngine(new GraphvizV8Engine(), new GraphvizJdkEngine());
+        Graphviz.useEngine(new GraphvizJdkEngine());
     }
 
     @AfterAll

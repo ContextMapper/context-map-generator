@@ -36,7 +36,7 @@ class RendererTest {
 
     @BeforeAll
     static void init() {
-        Graphviz.useEngine(new GraphvizV8Engine(), new GraphvizJdkEngine());
+        Graphviz.useEngine(new GraphvizCmdLineEngine());
     }
 
     @AfterAll
