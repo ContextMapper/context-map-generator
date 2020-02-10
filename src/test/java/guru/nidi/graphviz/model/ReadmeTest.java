@@ -52,7 +52,7 @@ class ReadmeTest {
                         node("a").with(Color.RED).link(node("b")),
                         node("b").link(to(node("c")).with(Style.DASHED))
                 );
-        Graphviz.fromGraph(g).height(100).render(Format.PNG).toFile(new File("graphviz-test-example/ex1.png"));
+        Graphviz.fromGraph(g).height(100).width(550).render(Format.PNG).toFile(new File("graphviz-test-example/ex1.png"));
         //## end
     }
 
@@ -99,7 +99,7 @@ class ReadmeTest {
                         to(compare).with(Color.RED)),
                 init.link(mkString));
 
-        Graphviz.fromGraph(g).width(900).render(Format.PNG).toFile(new File("graphviz-test-example/ex2.png"));
+        Graphviz.fromGraph(g).width(900).height(969).render(Format.PNG).toFile(new File("graphviz-test-example/ex2.png"));
         //## end
     }
 
