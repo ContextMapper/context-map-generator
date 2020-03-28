@@ -215,7 +215,7 @@ public class ContextMapGeneratorTest {
                 .addRelationship(new UpstreamDownstreamRelationship(customerManagement, policyManagement)
                         .setUpstreamPatterns(OPEN_HOST_SERVICE, PUBLISHED_LANGUAGE)
                         .setDownstreamPatterns(CONFORMIST))
-                .addRelationship(new Partnership(riskManagement, policyManagement));
+                .addRelationship(new Partnership(riskManagement, policyManagement).setName("RelNameTest"));
     }
 
 }
