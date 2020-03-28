@@ -86,8 +86,8 @@ Optionally it is possible to define a `name` or `implementation technology` for 
 ```java
 .addRelationship(new UpstreamDownstreamRelationship(printing, debtCollection)
     .setUpstreamPatterns(OPEN_HOST_SERVICE, PUBLISHED_LANGUAGE)
-    .setDownstreamPatterns(ANTICORRUPTION_LAYER))
-    .setName("PrintingDebts")
+    .setDownstreamPatterns(ANTICORRUPTION_LAYER)
+    .setName("PrintingDebts"))
     
 .addRelationship(new SharedKernel(debtCollection, policyManagement)
     .setImplementationTechnology("Java Library"))
