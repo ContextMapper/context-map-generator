@@ -20,7 +20,7 @@ package org.contextmapper.contextmap.generator.model;
  *
  * @author Stefan Kapferer
  */
-public class Partnership implements Relationship {
+public class Partnership extends AbstractRelationship implements Relationship {
 
     private BoundedContext bc1;
     private BoundedContext bc2;

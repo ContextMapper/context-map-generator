@@ -153,19 +153,19 @@ public class ContextMapGenerator {
             MutableNode node2 = this.bcNodesMap.get(rel.getSecondParticipant().getName());
 
             if (rel instanceof Partnership) {
-                node1.addLink(to(node2).with(createLabel("Partnership"))
+                node1.addLink(to(node2).with(createLabel("Partnership", rel.getName(), rel.getImplementationTechnology()))
                         .add(attr("fontname", "sans-serif"))
                         .add(attr("style", "bold"))
                         .add(attr("fontsize", "12")));
             } else if (rel instanceof SharedKernel) {
-                node1.addLink(to(node2).with(createLabel("Shared Kernel"))
+                node1.addLink(to(node2).with(createLabel("Shared Kernel", rel.getName(), rel.getImplementationTechnology()))
                         .add(attr("fontname", "sans-serif"))
                         .add(attr("style", "bold"))
                         .add(attr("fontsize", "12")));
             } else {
                 UpstreamDownstreamRelationship upDownRel = (UpstreamDownstreamRelationship) rel;
                 node1.addLink(to(node2).with(
-                        createLabel(upDownRel.isCustomerSupplier() ? "Customer/Supplier" : ""),
+                        createLabel(upDownRel.isCustomerSupplier() ? "Customer/Supplier" : "", rel.getName(), rel.getImplementationTechnology()),
                         attr("labeldistance", "0"),
                         attr("fontname", "sans-serif"),
                         attr("fontsize", "12"),
@@ -183,7 +183,26 @@ public class ContextMapGenerator {
         return graph;
     }
 
-    private Label createLabel(String label) {
+    private Label createLabel(String relationshipType, String relationshipName, String implementationTechnology) {
+        boolean relationshipTypeDefined = relationshipType != null && !"".equals(relationshipType);
+        boolean nameDefined = relationshipName != null && !"".equals(relationshipName);
+        boolean implementationTechnologyDefined = implementationTechnology != null && !"".equals(implementationTechnology);
+
+        String label = relationshipType;
+
+        if (relationshipTypeDefined && nameDefined && implementationTechnologyDefined)
+            label = relationshipName + " (" + relationshipType + " implemented with " + implementationTechnology + ")";
+        else if (nameDefined && implementationTechnologyDefined)
+            label = relationshipName + " (" + implementationTechnology + ")";
+        else if (relationshipTypeDefined && implementationTechnologyDefined)
+            label = relationshipType + " (" + implementationTechnology + ")";
+        else if (relationshipTypeDefined && nameDefined)
+            label = relationshipName + " (" + relationshipType + ")";
+        else if (nameDefined)
+            label = relationshipName;
+        else if (implementationTechnologyDefined)
+            label = implementationTechnology;
+
         if (!"".equals(label))
             return Label.of(label);
 

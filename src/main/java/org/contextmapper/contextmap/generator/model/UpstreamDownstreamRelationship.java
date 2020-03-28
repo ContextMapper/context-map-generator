@@ -24,7 +24,7 @@ import java.util.TreeSet;
  *
  * @author Stefan Kapferer
  */
-public class UpstreamDownstreamRelationship implements Relationship {
+public class UpstreamDownstreamRelationship extends AbstractRelationship implements Relationship {
 
     private BoundedContext upstreamBoundedContext;
     private BoundedContext downstreamBoundedContext;
