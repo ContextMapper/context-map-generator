@@ -14,13 +14,13 @@ Therefore, you can easily include the library to your Maven or Gradle build:
 <dependency>
   <groupId>org.contextmapper</groupId>
   <artifactId>context-map-generator</artifactId>
-  <version>1.0.2</version>
+  <version>1.1.0</version>
 </dependency>
 ```
 
 **Gradle:**
 ```gradle
-implementation 'org.contextmapper:context-map-generator:1.0.2'
+implementation 'org.contextmapper:context-map-generator:1.1.0'
 ```
 
 ### Preconditions
@@ -79,6 +79,23 @@ new ContextMapGenerator().setLabelSpacingFactor(10)
 The program above generates the following Context Map:
 
 <a href="https://raw.githubusercontent.com/ContextMapper/context-map-generator/master/context-map-example-1.png" target="_blank"><img src="https://raw.githubusercontent.com/ContextMapper/context-map-generator/master/context-map-example-1.png" alt="Example Context Map" /></a>
+
+### Labels
+Optionally it is possible to define a `name` or `implementation technology` for each relationship by using the corresponding setters. The following example calls show how we set them on relationships from the example above:
+
+```java
+.addRelationship(new UpstreamDownstreamRelationship(printing, debtCollection)
+    .setUpstreamPatterns(OPEN_HOST_SERVICE, PUBLISHED_LANGUAGE)
+    .setDownstreamPatterns(ANTICORRUPTION_LAYER))
+    .setName("PrintingDebts")
+    
+.addRelationship(new SharedKernel(debtCollection, policyManagement)
+    .setImplementationTechnology("Java Library"))
+```
+
+The generator adds those information as additional labels to the generated relationships, as this example shows:
+
+<a href="https://raw.githubusercontent.com/ContextMapper/context-map-generator/master/context-map-example-3.png" target="_blank"><img src="https://raw.githubusercontent.com/ContextMapper/context-map-generator/master/context-map-example-3.png" alt="Example Context Map" /></a>
 
 ### DDD "Cargo" Sample Application
 ```java
