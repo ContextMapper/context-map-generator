@@ -15,8 +15,6 @@
  */
 package guru.nidi.graphviz.attribute;
 
-import javax.annotation.Nullable;
-
 import static guru.nidi.graphviz.attribute.Attributes.attr;
 import static guru.nidi.graphviz.attribute.Attributes.attrs;
 import static java.util.Locale.ENGLISH;
@@ -75,7 +73,7 @@ public final class Arrow extends SingleAttributes<String, ForLink> {
         return config(0, type);
     }
 
-    public Attributes<ForLink> config(double size, @Nullable DirType type) {
+    public Attributes<ForLink> config(double size, DirType type) {
         Attributes<ForLink> a = this;
         if (size > 0) {
             a = attrs(a, attr("arrowsize", size));

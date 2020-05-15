@@ -15,7 +15,6 @@
  */
 package guru.nidi.graphviz.attribute;
 
-import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -36,13 +35,11 @@ public final class Label extends SimpleLabel implements Attributes<ForAll> {
     private final boolean external;
     private final boolean floating;
     private final boolean decorated;
-    @Nullable
     private final Justification just;
-    @Nullable
     private final Location loc;
 
     private Label(String value, boolean html, boolean external, boolean floating, boolean decorated,
-                  @Nullable Justification just, @Nullable Location loc) {
+                  Justification just, Location loc) {
         super(value, html);
         this.external = external;
         this.floating = floating;

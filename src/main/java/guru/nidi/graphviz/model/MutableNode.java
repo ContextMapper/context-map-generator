@@ -17,7 +17,6 @@ package guru.nidi.graphviz.model;
 
 import guru.nidi.graphviz.attribute.*;
 
-import javax.annotation.Nullable;
 import java.util.*;
 
 import static guru.nidi.graphviz.model.Factory.mutNode;
@@ -65,15 +64,15 @@ public class MutableNode implements MutableAttributed<MutableNode, ForNode>, Lin
         return this;
     }
 
-    public PortNode port(@Nullable String record) {
+    public PortNode port(String record) {
         return port(record, null);
     }
 
-    public PortNode port(@Nullable Compass compass) {
+    public PortNode port(Compass compass) {
         return port(null, compass);
     }
 
-    public PortNode port(@Nullable String record, @Nullable Compass compass) {
+    public PortNode port(String record, Compass compass) {
         return new ImmutablePortNode(this, new Port(record, compass));
     }
 

@@ -15,19 +15,16 @@
  */
 package guru.nidi.graphviz.engine;
 
-import javax.annotation.Nullable;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.function.Consumer;
 
 class BuiltInRasterizer implements Rasterizer {
     final String format;
-    @Nullable
     final String renderer;
-    @Nullable
     final String formatter;
 
-    BuiltInRasterizer(String format, @Nullable String renderer, @Nullable String formatter) {
+    BuiltInRasterizer(String format, String renderer, String formatter) {
         this.format = format;
         this.renderer = renderer;
         this.formatter = formatter;
@@ -39,7 +36,7 @@ class BuiltInRasterizer implements Rasterizer {
     }
 
     @Override
-    public BufferedImage rasterize(Graphviz graphviz, @Nullable Consumer<Graphics2D> graphicsConfigurer, String input) {
+    public BufferedImage rasterize(Graphviz graphviz, Consumer<Graphics2D> graphicsConfigurer, String input) {
         return null;
     }
 }

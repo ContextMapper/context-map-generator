@@ -17,7 +17,6 @@ package guru.nidi.graphviz.engine;
 
 import guru.nidi.graphviz.service.SystemUtils;
 
-import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -58,15 +57,13 @@ public final class Options {
 
     final Engine engine;
     final Format format;
-    @Nullable
     final Integer totalMemory;
-    @Nullable
     final Boolean yInvert;
     final File basedir;
     final List<Image> images;
 
-    private Options(Engine engine, Format format, @Nullable Integer totalMemory,
-                    @Nullable Boolean yInvert, File basedir, List<Image> images) {
+    private Options(Engine engine, Format format, Integer totalMemory,
+                    Boolean yInvert, File basedir, List<Image> images) {
         this.engine = engine;
         this.format = format;
         this.totalMemory = totalMemory;
@@ -111,11 +108,11 @@ public final class Options {
         return new Options(engine, format, totalMemory, yInvert, basedir, images);
     }
 
-    public Options totalMemory(@Nullable Integer totalMemory) {
+    public Options totalMemory(Integer totalMemory) {
         return new Options(engine, format, totalMemory, yInvert, basedir, images);
     }
 
-    public Options yInvert(@Nullable Boolean yInvert) {
+    public Options yInvert(Boolean yInvert) {
         return new Options(engine, format, totalMemory, yInvert, basedir, images);
     }
 

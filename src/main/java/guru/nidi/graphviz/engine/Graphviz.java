@@ -18,7 +18,6 @@ package guru.nidi.graphviz.engine;
 import guru.nidi.graphviz.model.Graph;
 import guru.nidi.graphviz.model.MutableGraph;
 
-import javax.annotation.Nullable;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;
@@ -32,20 +31,17 @@ public final class Graphviz {
     private static final Pattern DPI_PATTERN = Pattern.compile("\"?dpi\"?\\s*=\\s*\"?([0-9.]+)\"?",
             Pattern.CASE_INSENSITIVE);
 
-    @Nullable
     private static volatile BlockingQueue<GraphvizEngine> engineQueue;
-    @Nullable
     private static GraphvizEngine engine;
     private final String src;
     private final Options options;
-    @Nullable
     final Rasterizer rasterizer;
     final int width;
     final int height;
     final double scale;
     final double fontAdjust;
 
-    private Graphviz(String src, @Nullable Rasterizer rasterizer,
+    private Graphviz(String src, Rasterizer rasterizer,
                      int width, int height, double scale, double fontAdjust, Options options) {
         this.src = src;
         this.rasterizer = rasterizer;
@@ -152,11 +148,11 @@ public final class Graphviz {
         return new Graphviz(src, rasterizer, width, height, scale, fontAdjust, options.engine(engine));
     }
 
-    public Graphviz totalMemory(@Nullable Integer totalMemory) {
+    public Graphviz totalMemory(Integer totalMemory) {
         return new Graphviz(src, rasterizer, width, height, scale, fontAdjust, options.totalMemory(totalMemory));
     }
 
-    public Graphviz yInvert(@Nullable Boolean yInvert) {
+    public Graphviz yInvert(Boolean yInvert) {
         return new Graphviz(src, rasterizer, width, height, scale, fontAdjust, options.yInvert(yInvert));
     }
 
@@ -180,7 +176,7 @@ public final class Graphviz {
         return new Graphviz(src, rasterizer, width, height, scale, fontAdjust, options);
     }
 
-    public Renderer rasterize(@Nullable Rasterizer rasterizer) {
+    public Renderer rasterize(Rasterizer rasterizer) {
         if (rasterizer == null) {
             throw new IllegalArgumentException("The provided rasterizer implementation was not found. "
                     + "Make sure that the batik-rasterizer or svg-salamander jar is available on the classpath.");

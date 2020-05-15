@@ -15,7 +15,6 @@
  */
 package guru.nidi.graphviz.attribute;
 
-import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
@@ -38,7 +37,7 @@ public interface Attributes<F extends For> extends Iterable<Entry<String, Object
         return copy;
     }
 
-    static <F extends For> Attributes<F> attr(String key, @Nullable Object value) {
+    static <F extends For> Attributes<F> attr(String key,Object value) {
         return new MapAttributes<F>().add(key, value);
     }
 
@@ -59,7 +58,6 @@ public interface Attributes<F extends For> extends Iterable<Entry<String, Object
         return res;
     }
 
-    @Nullable
     default Object get(String key) {
         return applyTo(new MapAttributes<>()).get(key);
     }

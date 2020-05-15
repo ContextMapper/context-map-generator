@@ -17,12 +17,10 @@ package guru.nidi.graphviz.model;
 
 import guru.nidi.graphviz.attribute.*;
 
-import javax.annotation.Nullable;
 import java.util.*;
 
 public final class CreationContext {
     private static final ThreadLocal<Stack<CreationContext>> CONTEXT = ThreadLocal.withInitial(Stack::new);
-    @Nullable
     private final MutableGraph graph;
     private final Map<String, ImmutableNode> immutableNodes = new HashMap<>();
     private final Map<String, MutableNode> mutableNodes = new HashMap<>();
@@ -34,7 +32,7 @@ public final class CreationContext {
         this(null);
     }
 
-    private CreationContext(@Nullable MutableGraph graph) {
+    private CreationContext(MutableGraph graph) {
         this.graph = graph;
     }
 
@@ -42,7 +40,7 @@ public final class CreationContext {
         return use(null, actions);
     }
 
-    public static <T> T use(@Nullable MutableGraph graph, ThrowingFunction<CreationContext, T> actions) {
+    public static <T> T use(MutableGraph graph, ThrowingFunction<CreationContext, T> actions) {
         final CreationContext ctx = begin(graph);
         try {
             return actions.applyNotThrowing(ctx);
@@ -68,7 +66,7 @@ public final class CreationContext {
         return begin(null);
     }
 
-    static CreationContext begin(@Nullable MutableGraph graph) {
+    static CreationContext begin(MutableGraph graph) {
         final CreationContext ctx = new CreationContext(graph);
         CONTEXT.get().push(ctx);
         return ctx;
@@ -137,7 +135,7 @@ public final class CreationContext {
         return node;
     }
 
-    static Link createLink(@Nullable LinkSource from, LinkTarget to) {
+    static Link createLink(LinkSource from, LinkTarget to) {
         final Link link = new Link(from, to, Attributes.attrs());
         return current()
                 .map(ctx -> link.with(ctx.linkAttributes))

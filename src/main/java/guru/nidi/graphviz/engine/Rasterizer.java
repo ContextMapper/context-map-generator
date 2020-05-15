@@ -15,7 +15,6 @@
  */
 package guru.nidi.graphviz.engine;
 
-import javax.annotation.Nullable;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.function.Consumer;
@@ -24,9 +23,7 @@ import static guru.nidi.graphviz.engine.IoUtils.isOnClasspath;
 
 public interface Rasterizer {
 
-    @Nullable
     Rasterizer SALAMANDER = isOnClasspath("com.kitfox.svg.SVGDiagram") ? new SalamanderRasterizer() : null;
-    @Nullable
     Rasterizer DEFAULT = SALAMANDER;
 
     static Rasterizer builtIn(String format) {
@@ -43,5 +40,5 @@ public interface Rasterizer {
 
     Format format();
 
-    BufferedImage rasterize(Graphviz graphviz, @Nullable Consumer<Graphics2D> graphicsConfigurer, String input);
+    BufferedImage rasterize(Graphviz graphviz, Consumer<Graphics2D> graphicsConfigurer, String input);
 }

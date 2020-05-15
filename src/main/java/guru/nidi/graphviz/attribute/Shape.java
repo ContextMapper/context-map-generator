@@ -15,8 +15,6 @@
  */
 package guru.nidi.graphviz.attribute;
 
-import javax.annotation.Nullable;
-
 import static guru.nidi.graphviz.attribute.Attributes.attr;
 import static guru.nidi.graphviz.attribute.Attributes.attrs;
 import static guru.nidi.graphviz.attribute.NodeAttr.nodeAttr;
@@ -69,14 +67,11 @@ public final class Shape extends SingleAttributes<String, ForNode> {
 
     public static class Polygon implements Attributes<ForNode> {
         private final int sides;
-        @Nullable
         private final Double skew;
-        @Nullable
         private final Double distortion;
-        @Nullable
         private final Double rotation;
 
-        Polygon(int sides, @Nullable Double skew, @Nullable Double distortion, @Nullable Double rotation) {
+        Polygon(int sides, Double skew, Double distortion, Double rotation) {
             this.sides = sides;
             this.skew = skew;
             this.distortion = distortion;

@@ -17,7 +17,6 @@ package guru.nidi.graphviz.engine;
 
 import com.kitfox.svg.*;
 
-import javax.annotation.Nullable;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.StringReader;
@@ -28,7 +27,7 @@ import static java.awt.RenderingHints.*;
 
 class SalamanderRasterizer extends SvgRasterizer {
     @Override
-    public BufferedImage doRasterize(Graphviz graphviz, @Nullable Consumer<Graphics2D> graphicsConfigurer, String svg) {
+    public BufferedImage doRasterize(Graphviz graphviz, Consumer<Graphics2D> graphicsConfigurer, String svg) {
         final SVGDiagram diagram = createDiagram(svg);
         final BufferedImage image = new BufferedImage(
                 (int) diagram.getWidth(), (int) diagram.getHeight(), BufferedImage.TYPE_INT_ARGB);

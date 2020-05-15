@@ -15,7 +15,6 @@
  */
 package guru.nidi.graphviz.engine;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
@@ -23,12 +22,10 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public final class EngineResult {
-    @Nullable
     private final File file;
-    @Nullable
     private final String string;
 
-    private EngineResult(@Nullable File file, @Nullable String string) {
+    private EngineResult(File file, String string) {
         this.file = file;
         this.string = string;
     }

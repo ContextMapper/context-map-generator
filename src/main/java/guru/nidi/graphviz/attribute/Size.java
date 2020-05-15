@@ -15,8 +15,6 @@
  */
 package guru.nidi.graphviz.attribute;
 
-import javax.annotation.Nullable;
-
 import static guru.nidi.graphviz.attribute.NodeAttr.nodeAttr;
 
 public final class Size implements Attributes<ForNode> {
@@ -30,19 +28,14 @@ public final class Size implements Attributes<ForNode> {
         }
     }
 
-    @Nullable
     private final Mode mode;
-    @Nullable
     private final Double width;
-    @Nullable
     private final Double height;
-    @Nullable
     private final Double marginX;
-    @Nullable
     private final Double marginY;
 
-    private Size(@Nullable Mode mode, @Nullable Double width, @Nullable Double height,
-                 @Nullable Double marginX, @Nullable Double marginY) {
+    private Size(Mode mode, Double width, Double height,
+                 Double marginX, Double marginY) {
         this.mode = mode;
         this.width = width;
         this.height = height;

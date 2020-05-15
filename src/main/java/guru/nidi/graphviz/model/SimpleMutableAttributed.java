@@ -17,7 +17,6 @@ package guru.nidi.graphviz.model;
 
 import guru.nidi.graphviz.attribute.*;
 
-import javax.annotation.Nullable;
 import java.util.Objects;
 
 class SimpleMutableAttributed<T, F extends For> implements MutableAttributed<T, F> {
@@ -28,7 +27,7 @@ class SimpleMutableAttributed<T, F extends For> implements MutableAttributed<T, 
         this.target = target;
     }
 
-    public SimpleMutableAttributed(T target, @Nullable Attributes<? extends F> attributes) {
+    public SimpleMutableAttributed(T target, Attributes<? extends F> attributes) {
         this.target = target;
         if (attributes != null) {
             attributes.applyTo(this.attributes);

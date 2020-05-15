@@ -15,26 +15,21 @@
  */
 package guru.nidi.graphviz.model;
 
-import javax.annotation.Nullable;
 import java.util.Objects;
 
 public class Port {
-    @Nullable
     private final String record;
-    @Nullable
     private final Compass compass;
 
-    Port(@Nullable String record, @Nullable Compass compass) {
+    Port(String record, Compass compass) {
         this.record = record;
         this.compass = compass;
     }
 
-    @Nullable
     public String record() {
         return record;
     }
 
-    @Nullable
     public Compass compass() {
         return compass;
     }

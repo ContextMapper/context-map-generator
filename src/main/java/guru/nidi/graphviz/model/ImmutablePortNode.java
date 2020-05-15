@@ -17,7 +17,6 @@ package guru.nidi.graphviz.model;
 
 import guru.nidi.graphviz.attribute.Label;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
 
@@ -35,17 +34,17 @@ class ImmutablePortNode implements PortNode, LinkSource, LinkTarget {
     }
 
     @Override
-    public PortNode port(@Nullable String record) {
+    public PortNode port(String record) {
         return new ImmutablePortNode(node, new Port(record, port.compass()));
     }
 
     @Override
-    public PortNode port(@Nullable Compass compass) {
+    public PortNode port(Compass compass) {
         return new ImmutablePortNode(node, new Port(port.record(), compass));
     }
 
     @Override
-    public PortNode port(@Nullable String record, @Nullable Compass compass) {
+    public PortNode port(String record, Compass compass) {
         return new ImmutablePortNode(node, new Port(record, compass));
     }
 

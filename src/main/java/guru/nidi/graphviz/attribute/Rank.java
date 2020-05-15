@@ -15,8 +15,6 @@
  */
 package guru.nidi.graphviz.attribute;
 
-import javax.annotation.Nullable;
-
 public final class Rank {
     private Rank() {
     }
@@ -48,15 +46,13 @@ public final class Rank {
     }
 
     public static class GraphRank implements Attributes<ForGraph> {
-        @Nullable
         private final RankDir dir;
-        @Nullable
         private final Double sep;
         private final boolean equally;
         private final boolean cluster;
         private final boolean newRank;
 
-        GraphRank(@Nullable RankDir dir, @Nullable Double sep, boolean equally,
+        GraphRank(RankDir dir, Double sep, boolean equally,
                   boolean cluster, boolean newRank) {
             this.dir = dir;
             this.sep = sep;

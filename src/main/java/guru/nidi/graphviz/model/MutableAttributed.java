@@ -18,13 +18,11 @@ package guru.nidi.graphviz.model;
 import guru.nidi.graphviz.attribute.Attributes;
 import guru.nidi.graphviz.attribute.For;
 
-import javax.annotation.Nullable;
-
 import static guru.nidi.graphviz.attribute.Attributes.attr;
 import static guru.nidi.graphviz.attribute.Attributes.attrs;
 
 public interface MutableAttributed<T, F extends For> extends Attributes<F> {
-    default T add(String name, @Nullable Object value) {
+    default T add(String name, Object value) {
         return add(attr(name, value));
     }
 
