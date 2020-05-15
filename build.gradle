@@ -23,7 +23,7 @@ apply plugin: 'bintray-p2'
 
 group 'org.contextmapper'
 
-sourceCompatibility = 11
+sourceCompatibility = 1.8
 
 if (!project.hasProperty('signing.secretKeyRingFile')) {
     project.ext.'signing.secretKeyRingFile' = "${rootDir}/secret-key.gpg"
