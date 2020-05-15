@@ -6,6 +6,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.github.missedone:gradle-bintray-p2-plugin:1.2.0'
+        classpath 'org.standardout:bnd-platform:1.7.0'
     }
 }
 
@@ -22,7 +23,7 @@ apply plugin: 'bintray-p2'
 
 group 'org.contextmapper'
 
-sourceCompatibility = 1.8
+sourceCompatibility = 11
 
 if (!project.hasProperty('signing.secretKeyRingFile')) {
     project.ext.'signing.secretKeyRingFile' = "${rootDir}/secret-key.gpg"
@@ -169,7 +170,6 @@ updateSiteZip.dependsOn clean
 build.finalizedBy(updateSiteZip)
 
 platform {
-
     bundle "org.contextmapper:context-map-generator:${version}", {
         bnd {
             symbolicName = 'org.contextmapper.contextmap.generator'
@@ -191,6 +191,8 @@ platform {
     categoryName 'Context Map Generator'
     categoryId 'org.contextmapper.contextmap.generator'
 
+    eclipseMirror 'https://ftp.fau.de/eclipse/technology/epp/downloads/release/2020-03/R/eclipse-java-2020-03-R-linux-gtk-x86_64.tar.gz'
+    downloadsDir new File(buildDir, 'eclipse')
     useBndHashQualifiers false
     useFeatureHashQualifiers false
     defaultQualifier new SimpleDateFormat("YYYYMMddHHmmss").format(new Date())
