@@ -42,7 +42,7 @@ public class ContextMapGeneratorTest {
     private static final String TEAM_MAP_FILE = BASE_DIR + "/teammap.png";
     private static final String TEAM_MAP_FILE_SVG_FORMAT = BASE_DIR + "/teammap.svg";
     private static final String TEAM_MAP_FILE_DOT_FORMAT = BASE_DIR + "/teammap.gv";
-    private static final String TEAMS_ONLY_FILE = BASE_DIR + "/team-only_map.png";
+    private static final String TEAMS_ONLY_FILE = BASE_DIR + "/team-only-map.png";
     private static final String TEAM_MAP_NOT_CLUSTERED_FILE = BASE_DIR + "/teammap-not-clustered.png";
     private static final String TEAM_MAP_WITH_INTER_TYPE_REFERENCE_FILE = BASE_DIR + "/teammap-with-inter-type-reference.png";
     private static final String TEAM_MAP_WITH_INTER_TYPE_REFERENCE_NOT_CLUSTERED_FILE = BASE_DIR + "/teammap-with-inter-type-reference-not-clustered.png";
