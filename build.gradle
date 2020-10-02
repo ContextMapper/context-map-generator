@@ -211,6 +211,14 @@ publish.finalizedBy(publishP2Repo)
 
 test {
     useJUnitPlatform()
+
+    testLogging {
+        showExceptions true
+        exceptionFormat "full"
+
+        showCauses true
+        showStackTraces true
+    }
 }
 
 jacocoTestReport {

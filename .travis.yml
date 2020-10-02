@@ -8,7 +8,7 @@ script:
     if [[ $TRAVIS_TAG =~ ^v.* ]]; then
       ./gradlew clean build publish -Prelease.useLastTag=true -Psigning.keyId=${GPG_KEY_ID} -Psigning.password=${GPG_KEY_PASSPHRASE}
     else
-      ./gradlew clean build snapshot --stacktrace $(if [[ $TRAVIS_BRANCH == "master" && $TRAVIS_PULL_REQUEST == 'false' ]]; then echo "publish -Psigning.keyId=${GPG_KEY_ID} -Psigning.password=${GPG_KEY_PASSPHRASE}"; fi)
+      ./gradlew clean build snapshot $(if [[ $TRAVIS_BRANCH == "master" && $TRAVIS_PULL_REQUEST == 'false' ]]; then echo "publish -Psigning.keyId=${GPG_KEY_ID} -Psigning.password=${GPG_KEY_PASSPHRASE}"; fi)
     fi
 
 before_install:
