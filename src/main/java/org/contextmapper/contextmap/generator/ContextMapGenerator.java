@@ -371,6 +371,8 @@ public class ContextMapGenerator {
         File targetFile = new File(baseDir, "team-icon.png");
         OutputStream outStream = new FileOutputStream(targetFile);
         outStream.write(buffer);
+        outStream.flush();
+        outStream.close();
     }
 
 }
