@@ -49,6 +49,8 @@ public class ContextMapGeneratorTest {
 
     @BeforeAll
     static void prepare() {
+        if (!new File(BASE_DIR).exists())
+            new File(BASE_DIR).mkdir();
         deleteFileIfExisting(CONTEXT_MAP_FILE);
         deleteFileIfExisting(CONTEXT_MAP_FILE_FIXED_WIDTH);
         deleteFileIfExisting(CONTEXT_MAP_FILE_FIXED_HEIGHT);
