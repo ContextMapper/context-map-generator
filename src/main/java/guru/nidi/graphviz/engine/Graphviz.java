@@ -17,6 +17,8 @@ package guru.nidi.graphviz.engine;
 
 import guru.nidi.graphviz.model.Graph;
 import guru.nidi.graphviz.model.MutableGraph;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.*;

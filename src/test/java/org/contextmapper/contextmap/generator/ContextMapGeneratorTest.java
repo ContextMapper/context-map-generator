@@ -33,11 +33,19 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class ContextMapGeneratorTest {
 
-    private static final String CONTEXT_MAP_FILE = "./src-gen/contextmap.png";
-    private static final String CONTEXT_MAP_FILE_FIXED_WIDTH = "./src-gen/contextmap-width.png";
-    private static final String CONTEXT_MAP_FILE_FIXED_HEIGHT = "./src-gen/contextmap-height.png";
-    private static final String CONTEXT_MAP_FILE_DOT_FORMAT = "./src-gen/contextmap.dot";
-    private static final String CONTEXT_MAP_FILE_SVG_FORMAT = "./src-gen/contextmap.svg";
+    private static final String BASE_DIR = "./src-gen";
+    private static final String CONTEXT_MAP_FILE = BASE_DIR + "/contextmap.png";
+    private static final String CONTEXT_MAP_FILE_FIXED_WIDTH = BASE_DIR + "/contextmap-width.png";
+    private static final String CONTEXT_MAP_FILE_FIXED_HEIGHT = BASE_DIR + "/contextmap-height.png";
+    private static final String CONTEXT_MAP_FILE_DOT_FORMAT = BASE_DIR + "/contextmap.gv";
+    private static final String CONTEXT_MAP_FILE_SVG_FORMAT = BASE_DIR + "/contextmap.svg";
+    private static final String TEAM_MAP_FILE = BASE_DIR + "/teammap.png";
+    private static final String TEAM_MAP_FILE_SVG_FORMAT = BASE_DIR + "/teammap.svg";
+    private static final String TEAM_MAP_FILE_DOT_FORMAT = BASE_DIR + "/teammap.gv";
+    private static final String TEAMS_ONLY_FILE = BASE_DIR + "/team-only_map.png";
+    private static final String TEAM_MAP_NOT_CLUSTERED_FILE = BASE_DIR + "/teammap-not-clustered.png";
+    private static final String TEAM_MAP_WITH_INTER_TYPE_REFERENCE_FILE = BASE_DIR + "/teammap-with-inter-type-reference.png";
+    private static final String TEAM_MAP_WITH_INTER_TYPE_REFERENCE_NOT_CLUSTERED_FILE = BASE_DIR + "/teammap-with-inter-type-reference-not-clustered.png";
 
     @BeforeAll
     static void prepare() {
@@ -46,6 +54,13 @@ public class ContextMapGeneratorTest {
         deleteFileIfExisting(CONTEXT_MAP_FILE_FIXED_HEIGHT);
         deleteFileIfExisting(CONTEXT_MAP_FILE_DOT_FORMAT);
         deleteFileIfExisting(CONTEXT_MAP_FILE_SVG_FORMAT);
+        deleteFileIfExisting(TEAM_MAP_FILE);
+        deleteFileIfExisting(TEAM_MAP_FILE_SVG_FORMAT);
+        deleteFileIfExisting(TEAM_MAP_FILE_DOT_FORMAT);
+        deleteFileIfExisting(TEAMS_ONLY_FILE);
+        deleteFileIfExisting(TEAM_MAP_NOT_CLUSTERED_FILE);
+        deleteFileIfExisting(TEAM_MAP_WITH_INTER_TYPE_REFERENCE_FILE);
+        deleteFileIfExisting(TEAM_MAP_WITH_INTER_TYPE_REFERENCE_NOT_CLUSTERED_FILE);
     }
 
     static void deleteFileIfExisting(String filename) {
@@ -69,6 +84,132 @@ public class ContextMapGeneratorTest {
 
         // then
         assertTrue(new File(CONTEXT_MAP_FILE).exists());
+    }
+
+    @Test
+    public void canGenerateTeamMap() throws IOException {
+        // given
+        ContextMapGenerator generator = new ContextMapGenerator();
+
+        // when
+        assertFalse(new File(TEAM_MAP_FILE).exists());
+        OutputStream outputStream = new FileOutputStream(new File(TEAM_MAP_FILE));
+        generator.setLabelSpacingFactor(10)
+                .setWidth(2000)
+                .generateContextMapGraphic(createTestTeamMap(), Format.PNG, outputStream);
+        outputStream.close();
+
+        // then
+        assertTrue(new File(TEAM_MAP_FILE).exists());
+    }
+
+    @Test
+    public void canGenerateTeamMapNotClustered() throws IOException {
+        // given
+        ContextMapGenerator generator = new ContextMapGenerator();
+
+        // when
+        assertFalse(new File(TEAM_MAP_NOT_CLUSTERED_FILE).exists());
+        OutputStream outputStream = new FileOutputStream(new File(TEAM_MAP_NOT_CLUSTERED_FILE));
+        generator.setLabelSpacingFactor(10)
+                .clusterTeams(false)
+                .generateContextMapGraphic(createTestTeamMap(), Format.PNG, outputStream);
+        outputStream.close();
+
+        // then
+        assertTrue(new File(TEAM_MAP_NOT_CLUSTERED_FILE).exists());
+    }
+
+    @Test
+    public void canGenerateTeamMapWithInterTypeReference() throws IOException {
+        // given
+        ContextMapGenerator generator = new ContextMapGenerator();
+
+        // when
+        ContextMap contextMap = createTestTeamMap();
+        contextMap.addRelationship(new UpstreamDownstreamRelationship(
+                contextMap.getBoundedContexts().stream().filter(bc -> bc.getName().equals("Customer Management Context")).findFirst().get(),
+                contextMap.getBoundedContexts().stream().filter(bc -> bc.getName().equals("Customers Backend Team")).findFirst().get()));
+        assertFalse(new File(TEAM_MAP_WITH_INTER_TYPE_REFERENCE_FILE).exists());
+        OutputStream outputStream = new FileOutputStream(new File(TEAM_MAP_WITH_INTER_TYPE_REFERENCE_FILE));
+        generator.setLabelSpacingFactor(10)
+                .generateContextMapGraphic(contextMap, Format.PNG, outputStream);
+        outputStream.close();
+
+        // then
+        assertTrue(new File(TEAM_MAP_WITH_INTER_TYPE_REFERENCE_FILE).exists());
+    }
+
+    @Test
+    public void canGenerateTeamMapWithInterTypeReferenceNotClustered() throws IOException {
+        // given
+        ContextMapGenerator generator = new ContextMapGenerator();
+
+        // when
+        ContextMap contextMap = createTestTeamMap();
+        contextMap.addRelationship(new UpstreamDownstreamRelationship(
+                contextMap.getBoundedContexts().stream().filter(bc -> bc.getName().equals("Customer Management Context")).findFirst().get(),
+                contextMap.getBoundedContexts().stream().filter(bc -> bc.getName().equals("Customers Backend Team")).findFirst().get()));
+        assertFalse(new File(TEAM_MAP_WITH_INTER_TYPE_REFERENCE_NOT_CLUSTERED_FILE).exists());
+        OutputStream outputStream = new FileOutputStream(new File(TEAM_MAP_WITH_INTER_TYPE_REFERENCE_NOT_CLUSTERED_FILE));
+        generator.setLabelSpacingFactor(10)
+                .clusterTeams(false)
+                .generateContextMapGraphic(contextMap, Format.PNG, outputStream);
+        outputStream.close();
+
+        // then
+        assertTrue(new File(TEAM_MAP_WITH_INTER_TYPE_REFERENCE_NOT_CLUSTERED_FILE).exists());
+    }
+
+    @Test
+    public void canGenerateTeamMapAsSVG() throws IOException {
+        // given
+        ContextMapGenerator generator = new ContextMapGenerator()
+                .setBaseDir(new File(BASE_DIR));
+
+        // when
+        assertFalse(new File(TEAM_MAP_FILE_SVG_FORMAT).exists());
+        OutputStream outputStream = new FileOutputStream(new File(TEAM_MAP_FILE_SVG_FORMAT));
+        generator.setLabelSpacingFactor(10)
+                .setWidth(2000)
+                .generateContextMapGraphic(createTestTeamMap(), Format.SVG, outputStream);
+        outputStream.close();
+
+        // then
+        assertTrue(new File(TEAM_MAP_FILE_SVG_FORMAT).exists());
+    }
+
+    @Test
+    public void canGenerateTeamMapAsDOT() throws IOException {
+        // given
+        ContextMapGenerator generator = new ContextMapGenerator();
+
+        // when
+        assertFalse(new File(TEAM_MAP_FILE_DOT_FORMAT).exists());
+        OutputStream outputStream = new FileOutputStream(new File(TEAM_MAP_FILE_DOT_FORMAT));
+        generator.setLabelSpacingFactor(10)
+                .setWidth(2000)
+                .generateContextMapGraphic(createTestTeamMap(), Format.DOT, outputStream);
+        outputStream.close();
+
+        // then
+        assertTrue(new File(TEAM_MAP_FILE_DOT_FORMAT).exists());
+    }
+
+    @Test
+    public void canGenerateMapWithTeamsOnly() throws IOException {
+        // given
+        ContextMapGenerator generator = new ContextMapGenerator();
+
+        // when
+        assertFalse(new File(TEAMS_ONLY_FILE).exists());
+        OutputStream outputStream = new FileOutputStream(new File(TEAMS_ONLY_FILE));
+        generator.setLabelSpacingFactor(10)
+                .generateContextMapGraphic(createTeamsOnlyMap(), Format.PNG, outputStream);
+        outputStream.close();
+
+        // then
+        assertTrue(new File(TEAMS_ONLY_FILE).exists());
     }
 
     @Test
@@ -216,6 +357,59 @@ public class ContextMapGeneratorTest {
                         .setUpstreamPatterns(OPEN_HOST_SERVICE, PUBLISHED_LANGUAGE)
                         .setDownstreamPatterns(CONFORMIST))
                 .addRelationship(new Partnership(riskManagement, policyManagement).setName("RelNameTest"));
+    }
+
+    private ContextMap createTestTeamMap() {
+        BoundedContext customerManagement = new BoundedContext("Customer Management Context");
+        BoundedContext customerSelfService = new BoundedContext("Customer Self-Service Context");
+        BoundedContext policyManagementContext = new BoundedContext("Policy Management Context");
+        BoundedContext riskManagementContext = new BoundedContext("Risk Management Context");
+
+        BoundedContext customersBackendTeam = new BoundedContext("Customers Backend Team", BoundedContextType.TEAM)
+                .realizing(customerManagement);
+        BoundedContext customersFrontendTeam = new BoundedContext("Customers Frontend Team", BoundedContextType.TEAM)
+                .realizing(customerSelfService);
+        BoundedContext contractsTeam = new BoundedContext("Contracts", BoundedContextType.TEAM)
+                .realizing(policyManagementContext);
+        BoundedContext claimsTeam = new BoundedContext("Claims", BoundedContextType.TEAM)
+                .realizing(riskManagementContext);
+
+        return new ContextMap()
+                .addBoundedContext(customerManagement)
+                .addBoundedContext(customerSelfService)
+                .addBoundedContext(policyManagementContext)
+                .addBoundedContext(riskManagementContext)
+                .addBoundedContext(customersBackendTeam)
+                .addBoundedContext(customersFrontendTeam)
+                .addBoundedContext(contractsTeam)
+                .addBoundedContext(claimsTeam)
+                .addRelationship(new UpstreamDownstreamRelationship(customerManagement, customerSelfService)
+                        .setCustomerSupplier(true))
+                .addRelationship(new UpstreamDownstreamRelationship(customerManagement, policyManagementContext)
+                        .setUpstreamPatterns(OPEN_HOST_SERVICE, PUBLISHED_LANGUAGE)
+                        .setDownstreamPatterns(CONFORMIST))
+                .addRelationship(new Partnership(policyManagementContext, riskManagementContext))
+                .addRelationship(new UpstreamDownstreamRelationship(customersBackendTeam, customersFrontendTeam)
+                        .setCustomerSupplier(true))
+                .addRelationship(new UpstreamDownstreamRelationship(customersBackendTeam, contractsTeam))
+                .addRelationship(new Partnership(contractsTeam, claimsTeam));
+    }
+
+    private ContextMap createTeamsOnlyMap() {
+        BoundedContext customersBackendTeam = new BoundedContext("Customers Backend Team", BoundedContextType.TEAM);
+        BoundedContext customersFrontendTeam = new BoundedContext("Customers Frontend Team", BoundedContextType.TEAM);
+        BoundedContext contractsTeam = new BoundedContext("Contracts", BoundedContextType.TEAM);
+        BoundedContext claimsTeam = new BoundedContext("Claims", BoundedContextType.TEAM);
+
+        return new ContextMap()
+                .addBoundedContext(customersBackendTeam)
+                .addBoundedContext(customersFrontendTeam)
+                .addBoundedContext(contractsTeam)
+                .addBoundedContext(claimsTeam)
+                .addRelationship(new UpstreamDownstreamRelationship(customersBackendTeam, customersFrontendTeam)
+                        .setCustomerSupplier(true))
+                .addRelationship(new UpstreamDownstreamRelationship(customersBackendTeam, contractsTeam))
+                .addRelationship(new Partnership(contractsTeam, claimsTeam));
     }
 
 }
