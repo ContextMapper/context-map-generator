@@ -19,17 +19,13 @@ import guru.nidi.graphviz.attribute.Label;
 import guru.nidi.graphviz.attribute.Shape;
 import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.engine.Graphviz;
+import guru.nidi.graphviz.engine.Renderer;
 import guru.nidi.graphviz.model.MutableGraph;
 import guru.nidi.graphviz.model.MutableNode;
 import org.contextmapper.contextmap.generator.model.*;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-import java.util.TreeMap;
+import java.io.*;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static guru.nidi.graphviz.attribute.Attributes.attr;
@@ -45,12 +41,31 @@ public class ContextMapGenerator {
     private static final String EDGE_SPACING_UNIT = "        ";
 
     private Map<String, MutableNode> bcNodesMap;
+    private Set<MutableNode> genericNodes;
+    private Set<MutableNode> teamNodes;
+    private File baseDir; // used for Graphviz images
 
     protected int labelSpacingFactor = 1;
     protected int height = 1000;
     protected int width = 2000;
     protected boolean useHeight = false;
     protected boolean useWidth = true;
+    protected boolean clusterTeams = true;
+
+    public ContextMapGenerator() {
+        this.baseDir = new File(System.getProperty("java.io.tmpdir") + File.separator + "GraphvizJava");
+    }
+
+    /**
+     * Sets the base directory for included images (team maps).
+     * In case you work with SVG or DOT files it is recommended to set the directory into which you generate the images.
+     *
+     * @param baseDir the baseDir into which we copy the team map image.
+     */
+    public ContextMapGenerator setBaseDir(File baseDir) {
+        this.baseDir = baseDir;
+        return this;
+    }
 
     /**
      * Defines how much spacing we add to push the edges apart from each other.
@@ -95,6 +110,17 @@ public class ContextMapGenerator {
     }
 
     /**
+     * Defines whether teams (also generic contexts) are clustered together; is only relevant for mixed team maps
+     * containing both types of BCs. If true, the resulting layout clusters BCs of the same types.
+     *
+     * @param clusterTeams whether BCs of the same type shall be clustered or not
+     */
+    public ContextMapGenerator clusterTeams(boolean clusterTeams) {
+        this.clusterTeams = clusterTeams;
+        return this;
+    }
+
+    /**
      * Generates the graphical Context Map.
      *
      * @param contextMap the {@link ContextMap} for which the graphical representation shall be generated
@@ -103,13 +129,7 @@ public class ContextMapGenerator {
      * @throws IOException
      */
     public void generateContextMapGraphic(ContextMap contextMap, Format format, String fileName) throws IOException {
-        MutableGraph graph = createGraph(contextMap);
-
-        // store file
-        if (useWidth)
-            Graphviz.fromGraph(graph).width(width).render(format).toFile(new File(fileName));
-        else
-            Graphviz.fromGraph(graph).height(height).render(format).toFile(new File(fileName));
+        generateContextMapGraphic(contextMap, format).toFile(new File(fileName));
     }
 
     /**
@@ -121,69 +141,170 @@ public class ContextMapGenerator {
      * @throws IOException
      */
     public void generateContextMapGraphic(ContextMap contextMap, Format format, OutputStream outputStream) throws IOException {
+        generateContextMapGraphic(contextMap, format).toOutputStream(outputStream);
+    }
+
+    private Renderer generateContextMapGraphic(ContextMap contextMap, Format format) throws IOException {
+        exportImages();
         MutableGraph graph = createGraph(contextMap);
 
         // store file
         if (useWidth)
-            Graphviz.fromGraph(graph).width(width).render(format).toOutputStream(outputStream);
+            return Graphviz.fromGraph(graph).basedir(baseDir).width(width).render(format);
         else
-            Graphviz.fromGraph(graph).height(height).render(format).toOutputStream(outputStream);
+            return Graphviz.fromGraph(graph).basedir(baseDir).height(height).render(format);
     }
 
     private MutableGraph createGraph(ContextMap contextMap) {
         this.bcNodesMap = new TreeMap<>();
-        MutableGraph graph = mutGraph("ContextMapGraph");
+        this.genericNodes = new HashSet<>();
+        this.teamNodes = new HashSet<>();
+        MutableGraph rootGraph = createGraph("ContextMapGraph");
 
-        // create nodes
-        contextMap.getBoundedContexts().forEach(bc -> {
-            MutableNode node = mutNode(bc.getName());
-            node.add(Label.lines(bc.getName()));
-            node.add(Shape.EGG);
-            node.add(attr("margin", "0.3"));
-            node.add(attr("orientation", orientationDegree()));
-            node.add(attr("fontname", "sans-serif"));
-            node.add(attr("fontsize", "16"));
-            node.add(attr("style", "bold"));
-            bcNodesMap.put(bc.getName(), node);
-        });
+        createNodes(contextMap.getBoundedContexts());
 
-        // link nodes
-        contextMap.getRelationships().forEach(rel -> {
-            MutableNode node1 = this.bcNodesMap.get(rel.getFirstParticipant().getName());
-            MutableNode node2 = this.bcNodesMap.get(rel.getSecondParticipant().getName());
+        if (!needsSubGraphs(contextMap)) {
+            addNodesToGraph(rootGraph, bcNodesMap.values());
+            createRelationshipLinks4ExistingNodes(contextMap.getRelationships());
+        } else {
+            MutableGraph genericGraph = createGraph(getSubgraphName("GenericSubgraph"))
+                    .graphAttrs().add("color", "white");
+            addNodesToGraph(genericGraph, genericNodes);
+            MutableGraph teamGraph = createGraph(getSubgraphName("Teams_Subgraph"))
+                    .graphAttrs().add("color", "white");
+            addNodesToGraph(teamGraph, teamNodes);
+            genericGraph.addTo(rootGraph);
+            teamGraph.addTo(rootGraph);
 
-            if (rel instanceof Partnership) {
-                node1.addLink(to(node2).with(createLabel("Partnership", rel.getName(), rel.getImplementationTechnology()))
-                        .add(attr("fontname", "sans-serif"))
-                        .add(attr("style", "bold"))
-                        .add(attr("fontsize", "12")));
-            } else if (rel instanceof SharedKernel) {
-                node1.addLink(to(node2).with(createLabel("Shared Kernel", rel.getName(), rel.getImplementationTechnology()))
-                        .add(attr("fontname", "sans-serif"))
-                        .add(attr("style", "bold"))
-                        .add(attr("fontsize", "12")));
-            } else {
-                UpstreamDownstreamRelationship upDownRel = (UpstreamDownstreamRelationship) rel;
-                node1.addLink(to(node2).with(
-                        createLabel(upDownRel.isCustomerSupplier() ? "Customer/Supplier" : "", rel.getName(), rel.getImplementationTechnology()),
-                        attr("labeldistance", "0"),
-                        attr("fontname", "sans-serif"),
-                        attr("fontsize", "12"),
-                        attr("style", "bold"),
-                        attr("headlabel", getEdgeHTMLLabel("D", downstreamPatternsToStrings(upDownRel.getDownstreamPatterns()))),
-                        attr("taillabel", getEdgeHTMLLabel("U", upstreamPatternsToStrings(upDownRel.getUpstreamPatterns())))
-                ));
-            }
-        });
-
-        // add nodes to graph
-        for (MutableNode node : this.bcNodesMap.values()) {
-            graph.add(node);
+            createRelationshipLinks4ExistingNodes(contextMap.getRelationships().stream().filter(rel -> rel.getFirstParticipant().getType() == rel.getSecondParticipant().getType())
+                    .collect(Collectors.toSet()));
+            createRelationshipLinks(rootGraph, contextMap.getRelationships().stream().filter(rel -> rel.getFirstParticipant().getType() != rel.getSecondParticipant().getType())
+                    .collect(Collectors.toSet()));
+            createTeamImplementationLinks(rootGraph, contextMap.getBoundedContexts().stream().filter(bc -> bc.getType() == BoundedContextType.TEAM
+                    && !bc.getRealizedBoundedContexts().isEmpty()).collect(Collectors.toList()));
         }
-        return graph;
+        return rootGraph;
     }
 
-    private Label createLabel(String relationshipType, String relationshipName, String implementationTechnology) {
+    private String getSubgraphName(String baseName) {
+        return clusterTeams ? "cluster_" + baseName : baseName;
+    }
+
+    private boolean needsSubGraphs(ContextMap contextMap) {
+        boolean hasTeams = contextMap.getBoundedContexts().stream().anyMatch(bc -> bc.getType() == BoundedContextType.TEAM);
+        boolean hasGenericContexts = contextMap.getBoundedContexts().stream().anyMatch(bc -> bc.getType() == BoundedContextType.GENERIC);
+        return hasGenericContexts && hasTeams;
+    }
+
+    private MutableGraph createGraph(String name) {
+        MutableGraph rootGraph = mutGraph(name);
+        rootGraph.setDirected(true);
+        rootGraph.graphAttrs().add(attr("imagepath", baseDir.getAbsolutePath()));
+        return rootGraph;
+    }
+
+    private void addNodesToGraph(MutableGraph graph, Collection<MutableNode> nodes) {
+        for (MutableNode node : nodes) {
+            graph.add(node);
+        }
+    }
+
+    private void createNodes(Set<BoundedContext> boundedContexts) {
+        boundedContexts.forEach(bc -> {
+            MutableNode node = createNode(bc);
+            bcNodesMap.put(bc.getName(), node);
+            if (bc.getType() == BoundedContextType.TEAM)
+                teamNodes.add(node);
+            else
+                genericNodes.add(node);
+        });
+    }
+
+    private MutableNode createNode(BoundedContext bc) {
+        MutableNode node = mutNode(bc.getName());
+        node.add(createNodeLabel(bc));
+        node.add(Shape.EGG);
+        node.add(attr("margin", "0.3"));
+        node.add(attr("orientation", orientationDegree()));
+        node.add(attr("fontname", "sans-serif"));
+        node.add(attr("fontsize", "16"));
+        node.add(attr("style", "bold"));
+        return node;
+    }
+
+    private void createRelationshipLinks4ExistingNodes(Set<Relationship> relationships) {
+        relationships.forEach(rel -> {
+            createRelationshipLink(this.bcNodesMap.get(rel.getFirstParticipant().getName()),
+                    this.bcNodesMap.get(rel.getSecondParticipant().getName()), rel);
+        });
+    }
+
+    private void createRelationshipLinks(MutableGraph graph, Set<Relationship> relationships) {
+        relationships.forEach(rel -> {
+            MutableNode node1 = createNode(rel.getFirstParticipant());
+            MutableNode node2 = createNode(rel.getSecondParticipant());
+            createRelationshipLink(node1, node2, rel);
+            graph.add(node1);
+            graph.add(node2);
+        });
+    }
+
+    private void createRelationshipLink(MutableNode node1, MutableNode node2, Relationship rel) {
+        if (rel instanceof Partnership) {
+            node1.addLink(to(node2).with(createRelationshipLabel("Partnership", rel.getName(), rel.getImplementationTechnology()))
+                    .add(attr("dir", "none"))
+                    .add(attr("fontname", "sans-serif"))
+                    .add(attr("style", "bold"))
+                    .add(attr("fontsize", "12")));
+        } else if (rel instanceof SharedKernel) {
+            node1.addLink(to(node2).with(createRelationshipLabel("Shared Kernel", rel.getName(), rel.getImplementationTechnology()))
+                    .add(attr("dir", "none"))
+                    .add(attr("fontname", "sans-serif"))
+                    .add(attr("style", "bold"))
+                    .add(attr("fontsize", "12")));
+        } else {
+            UpstreamDownstreamRelationship upDownRel = (UpstreamDownstreamRelationship) rel;
+            node1.addLink(to(node2).with(
+                    createRelationshipLabel(upDownRel.isCustomerSupplier() ? "Customer/Supplier" : "", rel.getName(), rel.getImplementationTechnology()),
+                    attr("dir", "none"),
+                    attr("labeldistance", "0"),
+                    attr("fontname", "sans-serif"),
+                    attr("fontsize", "12"),
+                    attr("style", "bold"),
+                    attr("headlabel", getEdgeHTMLLabel("D", downstreamPatternsToStrings(upDownRel.getDownstreamPatterns()))),
+                    attr("taillabel", getEdgeHTMLLabel("U", upstreamPatternsToStrings(upDownRel.getUpstreamPatterns())))
+            ));
+        }
+    }
+
+    private void createTeamImplementationLinks(MutableGraph graph, List<BoundedContext> teams) {
+        for (BoundedContext team : teams) {
+            team.getRealizedBoundedContexts().forEach(system -> {
+                if (bcNodesMap.containsKey(team.getName()) && bcNodesMap.containsKey(system.getName())) {
+                    MutableNode node1 = createNode(team);
+                    MutableNode node2 = createNode(system);
+                    node1.addLink(to(node2).with(
+                            Label.lines("  «realizes»"),
+                            attr("color", "#686868"),
+                            attr("fontname", "sans-serif"),
+                            attr("fontsize", "12"),
+                            attr("fontcolor", "#686868"),
+                            attr("style", "dashed")));
+                    graph.add(node1);
+                    graph.add(node2);
+                }
+            });
+        }
+    }
+
+    private Label createNodeLabel(BoundedContext boundedContext) {
+        if (boundedContext.getType() == BoundedContextType.TEAM)
+            return Label.html("<table cellspacing=\"0\" cellborder=\"0\" border=\"0\"><tr><td rowspan=\"2\"><img src='team-icon.png' /></td><td width=\"10px\">" +
+                    "</td><td><b>Team</b></td></tr><tr><td width=\"10px\"></td><td>" + boundedContext.getName() + "</td></tr></table>");
+        return Label.lines(boundedContext.getName());
+    }
+
+    private Label createRelationshipLabel(String relationshipType, String relationshipName, String implementationTechnology) {
         boolean relationshipTypeDefined = relationshipType != null && !"".equals(relationshipType);
         boolean nameDefined = relationshipName != null && !"".equals(relationshipName);
         boolean implementationTechnologyDefined = implementationTechnology != null && !"".equals(implementationTechnology);
@@ -241,6 +362,21 @@ public class ContextMapGenerator {
         return Label.html("<table cellspacing=\"0\" cellborder=\"" + border + "\" border=\"0\">\n" +
                 "<tr>" + upstreamDownstreamCell + patternCell + "</tr>\n" +
                 "</table>");
+    }
+
+    private void exportImages() throws IOException {
+        if (!baseDir.exists())
+            baseDir.mkdir();
+        if (!new File(baseDir, "team-icon.png").exists()) {
+            InputStream teamIconInputStream = ContextMapGenerator.class.getClassLoader().getResourceAsStream("team-icon.png");
+            byte[] buffer = new byte[teamIconInputStream.available()];
+            teamIconInputStream.read(buffer);
+            File targetFile = new File(baseDir, "team-icon.png");
+            OutputStream outStream = new FileOutputStream(targetFile);
+            outStream.write(buffer);
+            outStream.flush();
+            outStream.close();
+        }
     }
 
 }

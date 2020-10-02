@@ -15,6 +15,8 @@
  */
 package org.contextmapper.contextmap.generator.model;
 
+import org.contextmapper.contextmap.generator.model.exception.BoundedContextIsNotATeamException;
+import org.contextmapper.contextmap.generator.model.exception.TeamCannotImplementTeamException;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
@@ -51,6 +53,80 @@ public class BoundedContextTest {
         // then
         assertTrue(equals);
         assertEquals(1, bcSet.size());
+    }
+
+    @Test
+    public void BoundedContextIsGenericByDefault() {
+        // given
+        BoundedContext testContext;
+
+        // when
+        testContext = new BoundedContext("TestContext");
+
+        // then
+        assertEquals(BoundedContextType.GENERIC, testContext.getType());
+    }
+
+    @Test
+    public void canChangeBoundedContextType() {
+        // given
+        BoundedContext testContext = new BoundedContext("TestContext");
+
+        // when
+        testContext.withType(BoundedContextType.TEAM);
+
+        // then
+        assertEquals(BoundedContextType.TEAM, testContext.getType());
+    }
+
+    @Test
+    public void genericContextCannotRealizeAnything() {
+        // given
+        BoundedContext testContext = new BoundedContext("TestContext");
+
+        // when, then
+        assertThrows(BoundedContextIsNotATeamException.class, () -> {
+            testContext.realizing(new BoundedContext("AnotherContext"));
+        });
+    }
+
+    @Test
+    public void teamCannotImplementOtherTeam() {
+        // given
+        BoundedContext team = new BoundedContext("TestTeam", BoundedContextType.TEAM);
+
+        // when, then
+        assertThrows(TeamCannotImplementTeamException.class, () -> {
+            team.realizing(new BoundedContext("AnotherTeam", BoundedContextType.TEAM));
+        });
+    }
+
+    @Test
+    public void teamCanRealizeSystem() {
+        // given
+        BoundedContext team = new BoundedContext("TestTeam", BoundedContextType.TEAM);
+        BoundedContext implementedSystem = new BoundedContext("TestSystem");
+
+        // when
+        team.realizing(implementedSystem);
+
+        // then
+        assertEquals(1, team.getRealizedBoundedContexts().size());
+        assertEquals("TestSystem", team.getRealizedBoundedContexts().get(0).getName());
+    }
+
+    @Test
+    public void genericSystemDoesNotRealizeAnything() {
+        // given
+        BoundedContext testContext1 = new BoundedContext("TestContext1", BoundedContextType.TEAM);
+        BoundedContext testContext2 = new BoundedContext("TestContext2");
+
+        // when
+        testContext1.realizing(testContext2);
+        testContext1.withType(BoundedContextType.GENERIC); // converting team to generic context
+
+        // then
+        assertTrue(testContext1.getRealizedBoundedContexts().isEmpty());
     }
 
     @Test
