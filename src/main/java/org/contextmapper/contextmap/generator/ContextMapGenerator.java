@@ -365,14 +365,18 @@ public class ContextMapGenerator {
     }
 
     private void exportImages() throws IOException {
-        InputStream teamIconInputStream = ContextMapGenerator.class.getClassLoader().getResourceAsStream("team-icon.png");
-        byte[] buffer = new byte[teamIconInputStream.available()];
-        teamIconInputStream.read(buffer);
-        File targetFile = new File(baseDir, "team-icon.png");
-        OutputStream outStream = new FileOutputStream(targetFile);
-        outStream.write(buffer);
-        outStream.flush();
-        outStream.close();
+        if (!baseDir.exists())
+            baseDir.mkdir();
+        if (!new File(baseDir, "team-icon.png").exists()) {
+            InputStream teamIconInputStream = ContextMapGenerator.class.getClassLoader().getResourceAsStream("team-icon.png");
+            byte[] buffer = new byte[teamIconInputStream.available()];
+            teamIconInputStream.read(buffer);
+            File targetFile = new File(baseDir, "team-icon.png");
+            OutputStream outStream = new FileOutputStream(targetFile);
+            outStream.write(buffer);
+            outStream.flush();
+            outStream.close();
+        }
     }
 
 }
