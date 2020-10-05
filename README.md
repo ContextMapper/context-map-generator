@@ -113,8 +113,7 @@ BoundedContext customersBackendTeam = new BoundedContext("Customers Backend Team
 BoundedContext customersFrontendTeam = new BoundedContext("Customers Frontend Team", BoundedContextType.TEAM)
   .realizing(customerSelfService);
 BoundedContext contractsTeam = new BoundedContext("Contracts", BoundedContextType.TEAM)
-  .realizing(policyManagementContext);
-BoundedContext claimsTeam = new BoundedContext("Claims", BoundedContextType.TEAM)
+  .realizing(policyManagementContext)
   .realizing(riskManagementContext);
 
 ContextMap contextMap = new ContextMap()
@@ -125,7 +124,6 @@ ContextMap contextMap = new ContextMap()
   .addBoundedContext(customersBackendTeam)
   .addBoundedContext(customersFrontendTeam)
   .addBoundedContext(contractsTeam)
-  .addBoundedContext(claimsTeam)
   .addRelationship(new UpstreamDownstreamRelationship(customerManagement, customerSelfService)
     .setCustomerSupplier(true))
   .addRelationship(new UpstreamDownstreamRelationship(customerManagement, policyManagementContext)
@@ -134,8 +132,7 @@ ContextMap contextMap = new ContextMap()
   .addRelationship(new Partnership(policyManagementContext, riskManagementContext))
   .addRelationship(new UpstreamDownstreamRelationship(customersBackendTeam, customersFrontendTeam)
     .setCustomerSupplier(true))
-  .addRelationship(new UpstreamDownstreamRelationship(customersBackendTeam, contractsTeam))
-  .addRelationship(new Partnership(contractsTeam, claimsTeam));
+  .addRelationship(new UpstreamDownstreamRelationship(customersBackendTeam, contractsTeam));
 
 new ContextMapGenerator()
   .generateContextMapGraphic(contextMap, Format.PNG, "/home/user/myContextMap.png");
