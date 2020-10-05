@@ -78,7 +78,7 @@ new ContextMapGenerator().setLabelSpacingFactor(10)
 
 The program above generates the following Context Map:
 
-<a href="https://raw.githubusercontent.com/ContextMapper/context-map-generator/master/context-map-example-1.png" target="_blank"><img src="https://raw.githubusercontent.com/ContextMapper/context-map-generator/master/context-map-example-1.png" alt="Example Context Map" /></a>
+<a href="https://raw.githubusercontent.com/ContextMapper/context-map-generator/master/examples/context-map-example-1.png" target="_blank"><img src="https://raw.githubusercontent.com/ContextMapper/context-map-generator/master/examples/context-map-example-1.png" alt="Example Context Map" /></a>
 
 ### Labels
 Optionally it is possible to define a `name` or `implementation technology` for each relationship by using the corresponding setters. The following example calls show how we set them on relationships from the example above:
@@ -95,7 +95,67 @@ Optionally it is possible to define a `name` or `implementation technology` for 
 
 The generator adds those information as additional labels to the generated relationships, as this example shows:
 
-<a href="https://raw.githubusercontent.com/ContextMapper/context-map-generator/master/context-map-example-3.png" target="_blank"><img src="https://raw.githubusercontent.com/ContextMapper/context-map-generator/master/context-map-example-3.png" alt="Example Context Map" /></a>
+<a href="https://raw.githubusercontent.com/ContextMapper/context-map-generator/master/examples/context-map-example-3.png" target="_blank"><img src="https://raw.githubusercontent.com/ContextMapper/context-map-generator/master/examples/context-map-example-3.png" alt="Example Context Map" /></a>
+
+### Team Maps
+The Context Map generator also allows users to illustrate which development teams work on which subsystems, components, or Bounded Contexts. By default, a Bounded Context is of
+the type "generic", but there is another constructor that allows you to create Bounded Contexts of the type "team". If a Bounded Context is of the type "team", it can
+"realize" a Bounded Context of the type "generic". The following example illustrates how you can use this concept to visualize which teams work on which Bounded Contexts:
+
+```java
+BoundedContext customerManagement = new BoundedContext("Customer Management Context");
+BoundedContext customerSelfService = new BoundedContext("Customer Self-Service Context");
+BoundedContext policyManagementContext = new BoundedContext("Policy Management Context");
+BoundedContext riskManagementContext = new BoundedContext("Risk Management Context");
+
+BoundedContext customersBackendTeam = new BoundedContext("Customers Backend Team", BoundedContextType.TEAM)
+  .realizing(customerManagement);
+BoundedContext customersFrontendTeam = new BoundedContext("Customers Frontend Team", BoundedContextType.TEAM)
+  .realizing(customerSelfService);
+BoundedContext contractsTeam = new BoundedContext("Contracts", BoundedContextType.TEAM)
+  .realizing(policyManagementContext);
+BoundedContext claimsTeam = new BoundedContext("Claims", BoundedContextType.TEAM)
+  .realizing(riskManagementContext);
+
+ContextMap contextMap = new ContextMap()
+  .addBoundedContext(customerManagement)
+  .addBoundedContext(customerSelfService)
+  .addBoundedContext(policyManagementContext)
+  .addBoundedContext(riskManagementContext)
+  .addBoundedContext(customersBackendTeam)
+  .addBoundedContext(customersFrontendTeam)
+  .addBoundedContext(contractsTeam)
+  .addBoundedContext(claimsTeam)
+  .addRelationship(new UpstreamDownstreamRelationship(customerManagement, customerSelfService)
+    .setCustomerSupplier(true))
+  .addRelationship(new UpstreamDownstreamRelationship(customerManagement, policyManagementContext)
+    .setUpstreamPatterns(OPEN_HOST_SERVICE, PUBLISHED_LANGUAGE)
+    .setDownstreamPatterns(CONFORMIST))
+  .addRelationship(new Partnership(policyManagementContext, riskManagementContext))
+  .addRelationship(new UpstreamDownstreamRelationship(customersBackendTeam, customersFrontendTeam)
+    .setCustomerSupplier(true))
+  .addRelationship(new UpstreamDownstreamRelationship(customersBackendTeam, contractsTeam))
+  .addRelationship(new Partnership(contractsTeam, claimsTeam));
+
+new ContextMapGenerator()
+  .generateContextMapGraphic(contextMap, Format.PNG, "/home/user/myContextMap.png");
+``` 
+
+By default, the generator produces the following _team map_:
+
+<a href="https://raw.githubusercontent.com/ContextMapper/context-map-generator/master/examples/team-map-example-1.png" target="_blank"><img src="https://raw.githubusercontent.com/ContextMapper/context-map-generator/master/examples/team-map-example-1.png" alt="Example Team Map (Clustered)" /></a>
+
+As you can see, the generator clusters the Bounded Contexts of the two types (teams and generic BCs) together. Alternatively, you can disable the clustering as follows:
+
+```java
+new ContextMapGenerator()
+  .clusterTeams(false) // disable clustering
+  .generateContextMapGraphic(contextMap, Format.PNG, "/home/user/myContextMap.png");
+``` 
+
+In this case the produced graphic looks as follows:
+
+<a href="https://raw.githubusercontent.com/ContextMapper/context-map-generator/master/examples/team-map-example-2.png" target="_blank"><img src="https://raw.githubusercontent.com/ContextMapper/context-map-generator/master/examples/team-map-example-2.png" alt="Example Team Map (Unclustered)" /></a>
 
 ### DDD "Cargo" Sample Application
 ```java
@@ -121,7 +181,7 @@ new ContextMapGenerator().setLabelSpacingFactor(10)
 
 The result:
 
-<a href="https://raw.githubusercontent.com/ContextMapper/context-map-generator/master/context-map-example-2.png" target="_blank"><img src="https://raw.githubusercontent.com/ContextMapper/context-map-generator/master/context-map-example-2.png" alt="Example Context Map" /></a>
+<a href="https://raw.githubusercontent.com/ContextMapper/context-map-generator/master/examples/context-map-example-2.png" target="_blank"><img src="https://raw.githubusercontent.com/ContextMapper/context-map-generator/master/examples/context-map-example-2.png" alt="Example Context Map" /></a>
 
 ## Parameters
 With the following methods you can parameterize the `ContextMapGenerator`:
@@ -131,13 +191,14 @@ With the following methods you can parameterize the `ContextMapGenerator`:
 | setHeight(int height)                    | By using this parameter you can fix the height of the produced image. Note that if you use fix the height, the width will be adjusted dynamically.                                                                                                                                                                                                       | 1000          |
 | setWidth(int width)                      | By using this parameter you can fix the width of the produced image. Note that if you use fix the width, the height will be adjusted dynamically.                                                                                                                                                                                                        | 2000          |
 | setLabelSpacingFactor(int spacingFactor) | The Graphviz layouting algorithm doesn't ensure that the labels of the edges do not overlap. Especially the boxes with the relationship patterns (OHS, PL, ACL, CF) may often overlap in our case. By introducing spacing between the edges we can often bypass this issue. This parameter (a factor between 1 and 20) controls how much spacing we add. | 1             |
+| clusterTeams(boolean clusterTeams)       | This parameter allows you to control whether Bounded Contexts of the different types (teams vs. generic) are clustered together or not. It is relevant for team maps only (see example team maps above).                                                                                                                                                 | true          |
 
 ## Supported Output Formats
 As illustrated in the example code above, the `generateContextMapGraphic` method takes a parameter to define the output format. The following formats are supported:
 
  * PNG
  * SVG
- * DOT ([Graphviz dot format](https://www.graphviz.org/doc/info/lang.html))
+ * DOT ([Graphviz dot format](https://www.graphviz.org/doc/info/lang.html); *.gv file)
 
 ## Development / Build
 If you want to contribute to this project you can create a fork and a pull request. The project is built with Gradle, so you can import it as Gradle project within Eclipse or IntelliJ IDEA (or any other IDE supporting Gradle).
