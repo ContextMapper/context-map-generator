@@ -14,13 +14,13 @@ Therefore, you can easily include the library to your Maven or Gradle build:
 <dependency>
   <groupId>org.contextmapper</groupId>
   <artifactId>context-map-generator</artifactId>
-  <version>1.1.1</version>
+  <version>1.2.0</version>
 </dependency>
 ```
 
 **Gradle:**
 ```gradle
-implementation 'org.contextmapper:context-map-generator:1.1.1'
+implementation 'org.contextmapper:context-map-generator:1.2.0'
 ```
 
 ### Preconditions
