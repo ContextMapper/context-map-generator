@@ -150,7 +150,7 @@ public class ContextMapGenerator {
 
     private Renderer generateContextMapGraphic(ContextMap contextMap, Format format) throws IOException {
         exportImages();
-        MutableGraph graph = createGraph(contextMap);
+        MutableGraph graph = createGraph(contextMap, format == Format.DOT);
 
         // store file
         if (useWidth)
@@ -159,11 +159,11 @@ public class ContextMapGenerator {
             return Graphviz.fromGraph(graph).basedir(baseDir).height(height).render(format);
     }
 
-    private MutableGraph createGraph(ContextMap contextMap) {
+    private MutableGraph createGraph(ContextMap contextMap, boolean withImagePath) {
         this.bcNodesMap = new TreeMap<>();
         this.genericNodes = new HashSet<>();
         this.teamNodes = new HashSet<>();
-        MutableGraph rootGraph = createGraph("ContextMapGraph");
+        MutableGraph rootGraph = createGraph("ContextMapGraph", withImagePath);
 
         createNodes(contextMap.getBoundedContexts());
 
@@ -171,10 +171,10 @@ public class ContextMapGenerator {
             addNodesToGraph(rootGraph, bcNodesMap.values());
             createRelationshipLinks4ExistingNodes(contextMap.getRelationships());
         } else {
-            MutableGraph genericGraph = createGraph(getSubgraphName("GenericSubgraph"))
+            MutableGraph genericGraph = createGraph(getSubgraphName("GenericSubgraph"), withImagePath)
                     .graphAttrs().add("color", "white");
             addNodesToGraph(genericGraph, genericNodes);
-            MutableGraph teamGraph = createGraph(getSubgraphName("Teams_Subgraph"))
+            MutableGraph teamGraph = createGraph(getSubgraphName("Teams_Subgraph"), withImagePath)
                     .graphAttrs().add("color", "white");
             addNodesToGraph(teamGraph, teamNodes);
             genericGraph.addTo(rootGraph);
@@ -200,10 +200,11 @@ public class ContextMapGenerator {
         return hasGenericContexts && hasTeams;
     }
 
-    private MutableGraph createGraph(String name) {
+    private MutableGraph createGraph(String name, boolean withImagePath) {
         MutableGraph rootGraph = mutGraph(name);
         rootGraph.setDirected(true);
-        rootGraph.graphAttrs().add(attr("imagepath", baseDir.getAbsolutePath()));
+        if (withImagePath)
+            rootGraph.graphAttrs().add(attr("imagepath", baseDir.getAbsolutePath()));
         return rootGraph;
     }
 
@@ -288,7 +289,7 @@ public class ContextMapGenerator {
                     MutableNode node1 = createNode(team);
                     MutableNode node2 = createNode(system);
                     node1.addLink(to(node2).with(
-                            Label.lines("  «realizes»"),
+                            Label.lines("  \"realizes\""),
                             attr("color", "#686868"),
                             attr("fontname", "sans-serif"),
                             attr("fontsize", "12"),
