@@ -25,6 +25,9 @@ import guru.nidi.graphviz.model.MutableNode;
 import org.contextmapper.contextmap.generator.model.*;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -39,6 +42,7 @@ import static guru.nidi.graphviz.model.Factory.*;
 public class ContextMapGenerator {
 
     private static final String EDGE_SPACING_UNIT = "        ";
+    private static final String TEAM_ICON_FILE_NAME = "team-icon.png";
 
     private Map<String, MutableNode> bcNodesMap;
     private Set<MutableNode> genericNodes;
@@ -146,7 +150,7 @@ public class ContextMapGenerator {
 
     private Renderer generateContextMapGraphic(ContextMap contextMap, Format format) throws IOException {
         exportImages();
-        MutableGraph graph = createGraph(contextMap);
+        MutableGraph graph = createGraph(contextMap, format == Format.DOT);
 
         // store file
         if (useWidth)
@@ -155,11 +159,11 @@ public class ContextMapGenerator {
             return Graphviz.fromGraph(graph).basedir(baseDir).height(height).render(format);
     }
 
-    private MutableGraph createGraph(ContextMap contextMap) {
+    private MutableGraph createGraph(ContextMap contextMap, boolean withImagePath) {
         this.bcNodesMap = new TreeMap<>();
         this.genericNodes = new HashSet<>();
         this.teamNodes = new HashSet<>();
-        MutableGraph rootGraph = createGraph("ContextMapGraph");
+        MutableGraph rootGraph = createGraph("ContextMapGraph", withImagePath);
 
         createNodes(contextMap.getBoundedContexts());
 
@@ -167,10 +171,10 @@ public class ContextMapGenerator {
             addNodesToGraph(rootGraph, bcNodesMap.values());
             createRelationshipLinks4ExistingNodes(contextMap.getRelationships());
         } else {
-            MutableGraph genericGraph = createGraph(getSubgraphName("GenericSubgraph"))
+            MutableGraph genericGraph = createGraph(getSubgraphName("GenericSubgraph"), withImagePath)
                     .graphAttrs().add("color", "white");
             addNodesToGraph(genericGraph, genericNodes);
-            MutableGraph teamGraph = createGraph(getSubgraphName("Teams_Subgraph"))
+            MutableGraph teamGraph = createGraph(getSubgraphName("Teams_Subgraph"), withImagePath)
                     .graphAttrs().add("color", "white");
             addNodesToGraph(teamGraph, teamNodes);
             genericGraph.addTo(rootGraph);
@@ -196,10 +200,11 @@ public class ContextMapGenerator {
         return hasGenericContexts && hasTeams;
     }
 
-    private MutableGraph createGraph(String name) {
+    private MutableGraph createGraph(String name, boolean withImagePath) {
         MutableGraph rootGraph = mutGraph(name);
         rootGraph.setDirected(true);
-        rootGraph.graphAttrs().add(attr("imagepath", baseDir.getAbsolutePath()));
+        if (withImagePath)
+            rootGraph.graphAttrs().add(attr("imagepath", baseDir.getAbsolutePath()));
         return rootGraph;
     }
 
@@ -284,7 +289,7 @@ public class ContextMapGenerator {
                     MutableNode node1 = createNode(team);
                     MutableNode node2 = createNode(system);
                     node1.addLink(to(node2).with(
-                            Label.lines("  «realizes»"),
+                            Label.lines(getRealizesLabel()),
                             attr("color", "#686868"),
                             attr("fontname", "sans-serif"),
                             attr("fontsize", "12"),
@@ -297,9 +302,13 @@ public class ContextMapGenerator {
         }
     }
 
+    private String getRealizesLabel() {
+        return (System.getProperty("os.name").toLowerCase().indexOf("win") >= 0) ? "  \"realizes\"" : "  «realizes»";
+    }
+
     private Label createNodeLabel(BoundedContext boundedContext) {
         if (boundedContext.getType() == BoundedContextType.TEAM)
-            return Label.html("<table cellspacing=\"0\" cellborder=\"0\" border=\"0\"><tr><td rowspan=\"2\"><img src='team-icon.png' /></td><td width=\"10px\">" +
+            return Label.html("<table cellspacing=\"0\" cellborder=\"0\" border=\"0\"><tr><td rowspan=\"2\"><img src='" + TEAM_ICON_FILE_NAME + "' /></td><td width=\"10px\">" +
                     "</td><td><b>Team</b></td></tr><tr><td width=\"10px\"></td><td>" + boundedContext.getName() + "</td></tr></table>");
         return Label.lines(boundedContext.getName());
     }
@@ -367,15 +376,9 @@ public class ContextMapGenerator {
     private void exportImages() throws IOException {
         if (!baseDir.exists())
             baseDir.mkdir();
-        if (!new File(baseDir, "team-icon.png").exists()) {
-            InputStream teamIconInputStream = ContextMapGenerator.class.getClassLoader().getResourceAsStream("team-icon.png");
-            byte[] buffer = new byte[teamIconInputStream.available()];
-            teamIconInputStream.read(buffer);
-            File targetFile = new File(baseDir, "team-icon.png");
-            OutputStream outStream = new FileOutputStream(targetFile);
-            outStream.write(buffer);
-            outStream.flush();
-            outStream.close();
+        if (!new File(baseDir, TEAM_ICON_FILE_NAME).exists()) {
+            InputStream teamIconInputStream = ContextMapGenerator.class.getClassLoader().getResourceAsStream(TEAM_ICON_FILE_NAME);
+            Files.copy(teamIconInputStream, Paths.get(baseDir.getAbsolutePath(), TEAM_ICON_FILE_NAME), StandardCopyOption.REPLACE_EXISTING);
         }
     }
 

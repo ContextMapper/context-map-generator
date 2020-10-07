@@ -209,6 +209,10 @@ public final class Graphviz {
         return options.format;
     }
 
+    public Options getOptions() {
+        return options;
+    }
+
     double dpi() {
         final Matcher matcher = DPI_PATTERN.matcher(src);
         return matcher.find() ? Double.parseDouble(matcher.group(1)) : 72;

@@ -68,8 +68,11 @@ public class GraphvizCmdLineEngine extends AbstractGraphvizEngine {
                     new OutputStreamWriter(new FileOutputStream(dotFile), StandardCharsets.UTF_8))) {
                 bw.write(preprocessCode(src, options));
             }
+            System.out.println("try to call: path=" + path.toString() + "; dotFile=" + dotFile.getAbsolutePath() + "; options=" + options.toString());
             return doExecute(path, dotFile, options, rasterizer);
         } catch (IOException | InterruptedException e) {
+            System.out.println("following exception was thrown:");
+            e.printStackTrace();
             throw new GraphvizException(e.getMessage(), e);
         }
     }
