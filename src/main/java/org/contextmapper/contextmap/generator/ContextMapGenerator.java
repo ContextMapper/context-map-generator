@@ -289,7 +289,7 @@ public class ContextMapGenerator {
                     MutableNode node1 = createNode(team);
                     MutableNode node2 = createNode(system);
                     node1.addLink(to(node2).with(
-                            Label.lines("  \"realizes\""),
+                            Label.lines(getRealizesLabel()),
                             attr("color", "#686868"),
                             attr("fontname", "sans-serif"),
                             attr("fontsize", "12"),
@@ -300,6 +300,10 @@ public class ContextMapGenerator {
                 }
             });
         }
+    }
+
+    private String getRealizesLabel() {
+        return (System.getProperty("os.name").toLowerCase().indexOf("win") >= 0) ? "  \"realizes\"" : "  «realizes»";
     }
 
     private Label createNodeLabel(BoundedContext boundedContext) {
