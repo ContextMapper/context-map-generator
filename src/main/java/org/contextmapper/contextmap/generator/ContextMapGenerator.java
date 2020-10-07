@@ -25,6 +25,9 @@ import guru.nidi.graphviz.model.MutableNode;
 import org.contextmapper.contextmap.generator.model.*;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -39,6 +42,7 @@ import static guru.nidi.graphviz.model.Factory.*;
 public class ContextMapGenerator {
 
     private static final String EDGE_SPACING_UNIT = "        ";
+    private static final String TEAM_ICON_FILE_NAME = "team-icon.png";
 
     private Map<String, MutableNode> bcNodesMap;
     private Set<MutableNode> genericNodes;
@@ -299,7 +303,7 @@ public class ContextMapGenerator {
 
     private Label createNodeLabel(BoundedContext boundedContext) {
         if (boundedContext.getType() == BoundedContextType.TEAM)
-            return Label.html("<table cellspacing=\"0\" cellborder=\"0\" border=\"0\"><tr><td rowspan=\"2\"><img src='team-icon.png' /></td><td width=\"10px\">" +
+            return Label.html("<table cellspacing=\"0\" cellborder=\"0\" border=\"0\"><tr><td rowspan=\"2\"><img src='" + TEAM_ICON_FILE_NAME + "' /></td><td width=\"10px\">" +
                     "</td><td><b>Team</b></td></tr><tr><td width=\"10px\"></td><td>" + boundedContext.getName() + "</td></tr></table>");
         return Label.lines(boundedContext.getName());
     }
@@ -367,15 +371,9 @@ public class ContextMapGenerator {
     private void exportImages() throws IOException {
         if (!baseDir.exists())
             baseDir.mkdir();
-        if (!new File(baseDir, "team-icon.png").exists()) {
-            InputStream teamIconInputStream = ContextMapGenerator.class.getClassLoader().getResourceAsStream("team-icon.png");
-            byte[] buffer = new byte[teamIconInputStream.available()];
-            teamIconInputStream.read(buffer);
-            File targetFile = new File(baseDir, "team-icon.png");
-            OutputStream outStream = new FileOutputStream(targetFile);
-            outStream.write(buffer);
-            outStream.flush();
-            outStream.close();
+        if (!new File(baseDir, TEAM_ICON_FILE_NAME).exists()) {
+            InputStream teamIconInputStream = ContextMapGenerator.class.getClassLoader().getResourceAsStream(TEAM_ICON_FILE_NAME);
+            Files.copy(teamIconInputStream, Paths.get(baseDir.getAbsolutePath(), TEAM_ICON_FILE_NAME), StandardCopyOption.REPLACE_EXISTING);
         }
     }
 
