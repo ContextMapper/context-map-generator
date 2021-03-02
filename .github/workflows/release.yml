@@ -17,6 +17,8 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 11
+    - name: Install Graphviz
+      run: sudo apt-get -y install graphviz
     - name: Gradle caches  
       uses: actions/cache@v2
       with:
