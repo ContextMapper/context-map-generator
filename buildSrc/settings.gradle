@@ -1,0 +1,3 @@
+include 'bnd-platform'
+include 'p2-plugin'
+
