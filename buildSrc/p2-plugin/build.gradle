@@ -1,0 +1,150 @@
+buildscript {
+    repositories {
+        jcenter()
+		maven {
+			url "https://plugins.gradle.org/m2/"
+		}
+    }
+    dependencies {
+        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:${bintrayPluginVersion}"
+
+        classpath "com.gradle.publish:plugin-publish-plugin:${publishPluginVersion}"
+    }
+}
+
+repositories {
+    jcenter()
+}
+
+task wrapper(type: Wrapper) {
+	gradleVersion = '2.13'
+}
+
+group = 'com.github.missedone'
+version = projectVersion
+
+apply plugin: 'groovy'
+apply plugin: 'com.jfrog.bintray'
+apply plugin: 'maven'
+apply plugin: "com.gradle.plugin-publish"
+
+targetCompatibility = "1.7"
+sourceCompatibility = "1.7"
+
+jar {
+	// include license into jar
+	into 'META-INF', {
+		from 'LICENSE'
+	}
+}
+
+dependencies {
+    compile gradleApi()
+    compile localGroovy()
+    compile "com.jfrog.bintray.gradle:gradle-bintray-plugin:${bintrayPluginVersion}"
+    compile("org.codehaus.groovy.modules.http-builder:http-builder:${httpBuilderVersion}") {
+        exclude(module: 'groovy')
+    }
+    // override the httpclient version to be consistent with 'gradle-download-task'
+    runtime 'org.apache.httpcomponents:httpclient:4.5.2'
+}
+
+
+// package source into a jar file
+task packageSources(type: Jar) {
+	from sourceSets.main.allSource
+	classifier = 'sources'
+}
+
+// define artifacts for upload
+artifacts {
+	archives jar
+	archives packageSources
+}
+
+def configurePom(def pom) {
+	// ensure correct artifact ID
+	pom.artifactId = 'p2-plugin'
+
+	// pom file details
+	pom.project {
+		name pluginName
+		packaging 'jar'
+		description pluginDesc
+		url projectUrl
+
+		scm {
+			url "scm:git:${projectUrl}.git"
+			connection "scm:git:${projectUrl}.git"
+			developerConnection "scm:git:${projectUrl}.git"
+		}
+
+		licenses {
+			license {
+				name 'The Apache Software License, Version 2.0'
+				url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+				distribution 'repo'
+			}
+		}
+
+		developers {
+			developer {
+				id 'missedone'
+				name 'Nick Tan'
+				email 'missedone@gmail.com'
+			}
+		}
+	}
+}
+
+install {
+	repositories.mavenInstaller {
+		// ensure correct artifact ID when installing locally
+		configurePom(pom)
+	}
+}
+
+bintray { // task bintrayUpload
+	user =System.getenv('BINTRAY_USER')
+	key = System.getenv('BINTRAY_API_KEY')
+
+	configurations = ['archives']
+
+	// Whether to run this as dry-run, without deploying
+	dryRun = false
+	// Whether version should be auto published after an upload 
+	publish = !project.version.endsWith('-SNAPSHOT')
+
+	pkg {
+		def githubUrl = projectUrl
+		repo = 'gradle-plugins'
+		name = pluginName
+		desc = pluginDesc
+		websiteUrl = githubUrl
+		issueTrackerUrl = "$githubUrl/issues"
+		vcsUrl = "${githubUrl}.git"
+		licenses = ['Apache-2.0']
+		labels = ['gradle', 'p2', 'eclipse']
+		publicDownloadNumbers = true
+		// version descriptor
+		version {
+			name = project.version
+			released  = new Date()
+			attributes = ['gradle-plugin': "com.github.missedone:${project.group}:p2-plugin"]
+		}
+	}
+}
+
+pluginBundle {
+    website = projectUrl
+    vcsUrl = projectUrl
+    description = pluginDesc
+    tags = ['p2', 'eclipse']
+
+    plugins {
+        greetingsPlugin {
+            id = 'com.github.missedone.p2-plugin'
+            displayName = 'Gradle P2 plugin'
+        }
+    }
+}
