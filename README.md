@@ -5,7 +5,7 @@
 This repository contains a Java library to generate graphical Domain-driven Design (DDD) Context Maps inspired by [Brandolini](https://www.infoq.com/articles/ddd-contextmapping/) and [Vernon](https://www.amazon.de/Implementing-Domain-Driven-Design-Vaughn-Vernon/dp/0321834577). The generation of the Context Maps is based on [Graphviz](https://www.graphviz.org/), [graphviz-java](https://github.com/nidi3/graphviz-java), and used within the [Context Mapper](https://contextmapper.org) tool.
 
 ## Usage
-The library is published to [Maven central](https://search.maven.org/search?q=g:%22org.contextmapper%22%20AND%20a:%22context-map-generator%22) and as an Eclipse feature to a [P2 repository](https://dl.bintray.com/contextmapper/context-map-generator-releases/).
+The library is published to [Maven central](https://search.maven.org/search?q=g:%22org.contextmapper%22%20AND%20a:%22context-map-generator%22) and as an Eclipse feature to a [P2 repository](https://contextmapper.jfrog.io/artifactory/context-map-generator-releases/).
 
 Therefore, you can easily include the library to your Maven or Gradle build:
 
