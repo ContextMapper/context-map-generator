@@ -186,7 +186,7 @@ platform {
     categoryName 'Context Map Generator'
     categoryId 'org.contextmapper.contextmap.generator'
 
-    eclipseMirror 'https://ftp.fau.de/eclipse/technology/epp/downloads/release/2020-03/R/eclipse-java-2020-03-R-linux-gtk-x86_64.tar.gz'
+    eclipseMirror 'https://ftp.fau.de/eclipse/technology/epp/downloads/release/2022-06/R/eclipse-java-2022-06-R-linux-gtk-x86_64.tar.gz'
     downloadsDir new File(buildDir, 'eclipse')
     useBndHashQualifiers false
     useFeatureHashQualifiers false
